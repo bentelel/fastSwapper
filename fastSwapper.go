@@ -15,24 +15,27 @@ type Defaults struct {
 type Default struct {
   Tgkdir string `json:"tgkdir"`
 }
+type ActiveSettings struct {
+  OldDirectory string
+  NewDirectory string
+}
+
 
 func main() {
   //args := os.Args[1:]
   //setDefaults(args)
-  set := getDefaults()
+  set := getDefaults("settings.json")
   fmt.Println(set.Tgkdir)
   // testMyFunctions()
 }
 
 
-func getDefaults() Default {
-  jsonFile, err := os.Open("settings.json")
-
+func unmarshalSettinsJson(filename string) Defaults {
+  jsonFile, err := os.Open(filename)
   if err != nil{
     log.Fatal(err)
   }
   defer jsonFile.Close()  
-
   byteResult, err := ioutil.ReadAll(jsonFile)
   if err != nil{
     log.Fatal(err)
@@ -42,11 +45,11 @@ func getDefaults() Default {
   if err != nil{
     log.Fatal(err)
   }
-  // for i := 0; i < len(settings.Defaults); i++ {
-  //   fmt.Println(settings.Defaults[i].Tgkdir)
-  // }
+  return settings
+} 
 
-  return settings.Defaults[0] 
+func getDefaults(filename string) Default {
+  return unmarshalSettinsJson(filename).Defaults[0] 
 }
 
 
