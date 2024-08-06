@@ -9,14 +9,23 @@ import (
         
 
 func main() {
+  args := os.Args[1:]
+  setDefaults(args)
   testMyFunctions()
+}
+
+
+func setDefaults(args []string) {
+
+  fmt.Println(args)
+
 }
 
 
 func testMyFunctions() {
  // dirs := getDirsInDir(`C:\go_testing\testFolder`)
   // allFiles := getAllInDir(`C:\go_testing\testFolder`)
- 
+  fmt.Println("Inside testMyFunctions") 
   dirs := getDirsInDir(`C:\go_testing`)
   allFiles := getAllInDir(`C:\go_testing`)
   
