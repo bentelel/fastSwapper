@@ -9,8 +9,12 @@ import (
         
 
 func main() {
+  testMyFunctions()
+}
 
-  // dirs := getDirsInDir(`C:\go_testing\testFolder`)
+
+func testMyFunctions() {
+ // dirs := getDirsInDir(`C:\go_testing\testFolder`)
   // allFiles := getAllInDir(`C:\go_testing\testFolder`)
  
   dirs := getDirsInDir(`C:\go_testing`)
@@ -26,7 +30,6 @@ func main() {
     fmt.Println(e)
   }
 }
-
 
 func getDirsInDir(dir string) []string{
   // Returns slice of strings containing all directories within given directory
