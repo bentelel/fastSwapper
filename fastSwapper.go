@@ -1,21 +1,26 @@
 package main
 
-import ("fmt"
+import (
+        "fmt"
         "os" 
         "path/filepath"
         "log"
         )
-
+        
 
 func main() {
 
-  dirs := getDirsInDir(`C:\go_testing\testFolder`)
-  allFiles := getAllInDir(`C:\go_testing\testFolder`)
+  // dirs := getDirsInDir(`C:\go_testing\testFolder`)
+  // allFiles := getAllInDir(`C:\go_testing\testFolder`)
  
+  dirs := getDirsInDir(`C:\go_testing`)
+  allFiles := getAllInDir(`C:\go_testing`)
+  
   fmt.Println("Printing all dirs:")
   for _, e := range dirs{
     fmt.Println(e)
   }
+  fmt.Println("")
   fmt.Println("Printing all dirs and files:")
   for _, e := range allFiles{
     fmt.Println(e)
