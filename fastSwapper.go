@@ -30,6 +30,8 @@ func main() {
   fmt.Println(set.Tgkdir)
 
   setDefaults("settings.json", "Tgkdir", "C:\\Tagetik\\Tagetik Excel .NET Client")
+  
+  // fmt.Println(set.Tgkdir)
 }
 
 
@@ -56,7 +58,7 @@ func unmarshalSettingsJson(filename string) Defaults {
   return settings
 }
 
-func updateSettingsJson(filename string, data Default) {
+func updateSettingsJson(filename string, data Defaults) {
   modifiedJson, err := json.MarshalIndent(data, "", "    ")
   if err != nil{
     log.Fatal(err)
@@ -73,9 +75,9 @@ func getDefaults(filename string) Default {
 
 
 func setDefaults(filename string, defaultToChange string, newValue string) {
-  unmarshaledJson := unmarshalSettingsJson(filename).Defaults[0]
+  unmarshaledJson := unmarshalSettingsJson(filename)//.Defaults[0]
 
-  err := reflections.SetField(&unmarshaledJson, defaultToChange, newValue)
+  err := reflections.SetField(&unmarshaledJson.Defaults[0], defaultToChange, newValue)
   if err != nil{
       log.Fatal(err)
     }
