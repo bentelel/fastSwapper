@@ -3,6 +3,7 @@ package main
 import (
         "fmt"
         "os" 
+        "errors"
         "path/filepath"
         "log"
         "encoding/json"
@@ -24,14 +25,16 @@ type ActiveSettings struct {
 
 
 func main() {
-  //args := os.Args[1:]
-  //setDefaults(args)
+  args := os.Args[1:]
+  err := parseCLIargs(args)
+  if err != nil {
+    log.Fatal(err.Error())
+  }
   set := getDefaults("settings.json")
-  fmt.Println(set.Tgkdir)
 
-  setDefaults("settings.json", "Tgkdir", "C:\\Tagetik\\Tagetik Excel .NET Client")
+  // setDefaults("settings.json", "Tgkdir", "C:\\Tagetik\\Tagetik Excel .NET Client")
   
-  // fmt.Println(set.Tgkdir)
+  fmt.Println(getAllInDir(set.Tgkdir))
 }
 
 
@@ -39,6 +42,45 @@ func typeof(v interface{}) string {
   return reflect.TypeOf(v).String()
 }
 
+func containsString(s []string, e string) bool {
+    for _, a := range s {
+        if a == e {
+            return true
+        }
+    }
+    return false
+}
+
+func parseCLIargs (args []string) error {
+  var err error
+  if len(args)==0 {
+    return err
+  }
+  //set default path flag expects the syntax of fastSwapper -d <path to directory>
+  const SET_DEFAULT_PATH_FLAG = "-d"
+  if containsString(args, SET_DEFAULT_PATH_FLAG){
+    if len(args)<2 {
+      err = errors.New("No path provided. Use fastSwapper -d <path to default dir>.")
+      return err
+    }
+    candidatePath := args[1]
+    if !isDir(candidatePath) {
+      err = errors.New("Supplied path does not exist.")
+      return err
+    }
+    setDefaults("settings.json", "Tgkdir", candidatePath)
+  }
+  
+  return err
+}
+
+
+func isDir(path string) bool {
+  if _, err := os.Stat(path); os.IsNotExist(err) {
+    return false    
+  }
+  return true
+} 
 
 func unmarshalSettingsJson(filename string) Defaults {
   jsonFile, err := os.Open(filename)
