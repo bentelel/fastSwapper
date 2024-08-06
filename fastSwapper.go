@@ -25,5 +25,5 @@ func getDirsInDir(dir string) [2]string{
   for _, e := range entries{
     fmt.Println(e.Name())
   }
-  return [2]string{"a", "z"}
+  return [2]string{"a", "o"}
 }
