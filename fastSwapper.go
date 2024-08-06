@@ -7,6 +7,8 @@ import (
         "log"
         "encoding/json"
         "io/ioutil"
+        "reflect"
+        "github.com/oleiade/reflections"
         )
 
 type Defaults struct {
@@ -26,11 +28,17 @@ func main() {
   //setDefaults(args)
   set := getDefaults("settings.json")
   fmt.Println(set.Tgkdir)
-  // testMyFunctions()
+
+  setDefaults("settings.json", "Tgkdir", "C:\\Tagetik\\Tagetik Excel .NET Client")
 }
 
 
-func unmarshalSettinsJson(filename string) Defaults {
+func typeof(v interface{}) string {
+  return reflect.TypeOf(v).String()
+}
+
+
+func unmarshalSettingsJson(filename string) Defaults {
   jsonFile, err := os.Open(filename)
   if err != nil{
     log.Fatal(err)
@@ -46,30 +54,34 @@ func unmarshalSettinsJson(filename string) Defaults {
     log.Fatal(err)
   }
   return settings
-} 
+}
+
+func updateSettingsJson(filename string, data Default) {
+  modifiedJson, err := json.MarshalIndent(data, "", "    ")
+  if err != nil{
+    log.Fatal(err)
+  }
+  err = ioutil.WriteFile(filename, modifiedJson, 0644)
+  if err != nil{
+    log.Fatal(err)
+  }
+}
 
 func getDefaults(filename string) Default {
-  return unmarshalSettinsJson(filename).Defaults[0] 
+  return unmarshalSettingsJson(filename).Defaults[0] 
 }
 
 
-func testMyFunctions() {
- // dirs := getDirsInDir(`C:\go_testing\testFolder`)
-  // allFiles := getAllInDir(`C:\go_testing\testFolder`)
-  fmt.Println("Inside testMyFunctions") 
-  dirs := getDirsInDir(`C:\go_testing`)
-  allFiles := getAllInDir(`C:\go_testing`)
-  
-  fmt.Println("Printing all dirs:")
-  for _, e := range dirs{
-    fmt.Println(e)
-  }
-  fmt.Println("")
-  fmt.Println("Printing all dirs and files:")
-  for _, e := range allFiles{
-    fmt.Println(e)
-  }
+func setDefaults(filename string, defaultToChange string, newValue string) {
+  unmarshaledJson := unmarshalSettingsJson(filename).Defaults[0]
+
+  err := reflections.SetField(&unmarshaledJson, defaultToChange, newValue)
+  if err != nil{
+      log.Fatal(err)
+    }
+  updateSettingsJson(filename, unmarshaledJson)
 }
+
 
 func getDirsInDir(dir string) []string{
   // Returns slice of strings containing all directories within given directory
