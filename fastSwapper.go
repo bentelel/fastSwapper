@@ -12,15 +12,16 @@ import (
         "github.com/oleiade/reflections"
         )
 
-type Defaults struct {
-  Defaults []Default `json:"defaults"` 
+type Settings struct {
+  Settings []Default `json:"defaults"`
+  ActiveSettings []ActiveSettings `json:"activesettings"`
 }
 type Default struct {
   Tgkdir string `json:"tgkdir"`
 }
 type ActiveSettings struct {
-  OldDirectory string
-  NewDirectory string
+  OldDirectory string `json:"olddirectory` 
+  NewDirectory string `json:"newdirectory`
 }
 
 
@@ -30,9 +31,9 @@ func main() {
   if err != nil {
     log.Fatal(err.Error())
   }
-  set := getDefaults("settings.json")
+  set := getSettings("settings.json")
 
-  // setDefaults("settings.json", "Tgkdir", "C:\\Tagetik\\Tagetik Excel .NET Client")
+  // setSettings("settings.json", "Tgkdir", "C:\\Tagetik\\Tagetik Excel .NET Client")
   
   fmt.Println(getAllInDir(set.Tgkdir))
 }
@@ -68,7 +69,7 @@ func parseCLIargs (args []string) error {
       err = errors.New("Supplied path does not exist.")
       return err
     }
-    setDefaults("settings.json", "Tgkdir", candidatePath)
+    setSettings("settings.json", "Tgkdir", candidatePath)
   }
   
   return err
@@ -82,7 +83,7 @@ func isDir(path string) bool {
   return true
 } 
 
-func unmarshalSettingsJson(filename string) Defaults {
+func unmarshalSettingsJson(filename string) Settings {
   jsonFile, err := os.Open(filename)
   if err != nil{
     log.Fatal(err)
@@ -92,7 +93,7 @@ func unmarshalSettingsJson(filename string) Defaults {
   if err != nil{
     log.Fatal(err)
   }
-  var settings Defaults
+  var settings Settings
   err = json.Unmarshal(byteResult, &settings)
   if err != nil{
     log.Fatal(err)
@@ -100,7 +101,7 @@ func unmarshalSettingsJson(filename string) Defaults {
   return settings
 }
 
-func updateSettingsJson(filename string, data Defaults) {
+func updateSettingsJson(filename string, data Settings) {
   modifiedJson, err := json.MarshalIndent(data, "", "    ")
   if err != nil{
     log.Fatal(err)
@@ -111,15 +112,15 @@ func updateSettingsJson(filename string, data Defaults) {
   }
 }
 
-func getDefaults(filename string) Default {
-  return unmarshalSettingsJson(filename).Defaults[0] 
+func getSettings(filename string) Default {
+  return unmarshalSettingsJson(filename).Settings[0] 
 }
 
 
-func setDefaults(filename string, defaultToChange string, newValue string) {
-  unmarshaledJson := unmarshalSettingsJson(filename)//.Defaults[0]
+func setSettings(filename string, defaultToChange string, newValue string) {
+  unmarshaledJson := unmarshalSettingsJson(filename)//.Settings[0]
 
-  err := reflections.SetField(&unmarshaledJson.Defaults[0], defaultToChange, newValue)
+  err := reflections.SetField(&unmarshaledJson.Settings[0], defaultToChange, newValue)
   if err != nil{
       log.Fatal(err)
     }
