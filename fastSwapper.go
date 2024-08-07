@@ -55,6 +55,16 @@ func parseCLIargs(args []string) error {
 		setSettings("settings.json", "Tgkdir", candidatePath)
 	}
 
+	const SET_DEFAULT_WINPATH_FLAG = "-dw"
+	const TGK_DIR_DEFAULT_WIN = "C:\\Tagetik\\Tagetik Excel .NET Client"
+	if ContainsString(args, SET_DEFAULT_WINPATH_FLAG) {
+		if len(args) > 1 {
+			err = errors.New("Flag -dw does not take any additional arguments.")
+			return err
+		}
+		setSettings("settings.json", "Tgkdir", TGK_DIR_DEFAULT_WIN)
+		fmt.Printf("%s set as tagetik addin directory.\n", TGK_DIR_DEFAULT_WIN)
+	}
 	return err
 }
 
