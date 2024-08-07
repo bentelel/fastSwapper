@@ -23,6 +23,22 @@ type ActiveSettings struct {
 	NewDirectory string `json:"newdirectory"`
 }
 
+type helpInformation struct {
+	availableFlagsWithDesc map[string]string
+}
+
+func HelpInformation() helpInformation {
+	var help helpInformation
+	help.availableFlagsWithDesc = map[string]string{
+		"-d":  "Set default tagetik directory > fastSwapper -d <absolute path to directory>",
+		"-dw": "Reset default tagetik directory to the Windows one.",
+		"-o":  "Set the name of the old directory, under this name the current Addin will be saved on swap. > fastSwapper -o <name of directory you want>",
+		"-n":  "Set the name of the new directory, this will be used to remember the chosen name of the current Addin version, \n\t\tbecause we set that to the default directory and don't want the user to retype it every time. \n\t\t> fastSwapper -n <name of directory you want>",
+		"-h":  "Displays this help, use > fastSwapper -h <some other flag> to display only the help for a specific flag.",
+	}
+	return help
+}
+
 func main() {
 	args := os.Args[1:]
 	err := parseCLIargs(args)
@@ -30,7 +46,6 @@ func main() {
 		log.Fatal(err.Error())
 	}
 	set := getSettings("settings.json")
-	// setSettings("settings.json", "Tgkdir", "C:\\Tagetik\\Tagetik Excel .NET Client")
 
 	fmt.Println(GetAllInDir(set.Tgkdir))
 }
@@ -39,6 +54,23 @@ func parseCLIargs(args []string) error {
 	var err error
 	if len(args) == 0 {
 		return err
+	}
+	const HELP_FLAG = "-h"
+	if args[0] == HELP_FLAG && len(args) == 2 {
+		help := HelpInformation()
+		if help.availableFlagsWithDesc[args[1]] == "" {
+			err = errors.New("Flag does not exist: " + args[1])
+			return err
+		}
+		fmt.Printf("flag: %s\t%s\n", args[1], help.availableFlagsWithDesc[args[1]])
+		return err
+	}
+	if args[0] == HELP_FLAG {
+		help := HelpInformation()
+		for k, v := range help.availableFlagsWithDesc {
+			fmt.Printf("flag: %s\t%s\n", k, v)
+			return err
+		}
 	}
 	if len(args) > 2 {
 		err = errors.New("No flag supports more than 2 arguments. At most run > fastSwapper -flag <argument for flag>")
@@ -83,6 +115,7 @@ func parseCLIargs(args []string) error {
 			return err
 		}
 		setActiveSettings("settings.json", "OldDirectory", candidateName)
+		return err
 	}
 	// set new directory name flag expects the syntax of fastSwapper -n <name directory>
 	const SET_NEWDIR_NAME_FLAG = "-n"
@@ -98,6 +131,7 @@ func parseCLIargs(args []string) error {
 			return err
 		}
 		setActiveSettings("settings.json", "NewDirectory", candidateName)
+		return err
 	}
 	return err
 }
