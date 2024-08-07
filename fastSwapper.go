@@ -64,18 +64,17 @@ func parseCLIargs(args []string) error {
 		}
 		fmt.Printf("flag: %s\t%s\n", args[1], help.availableFlagsWithDesc[args[1]])
 		return err
-	}
-	if args[0] == HELP_FLAG {
+	} else if args[0] == HELP_FLAG && len(args) == 1 {
 		help := HelpInformation()
 		for k, v := range help.availableFlagsWithDesc {
 			fmt.Printf("flag: %s\t%s\n", k, v)
-			return err
 		}
+		return err
 	}
 	const SWAP_FLAG = "-sw"
 	if args[0] == SWAP_FLAG && len(args) == 1 {
 		// add checking for correct dir names here
-		swapDirectories(getCompleteSettingis(SETTINGS_FILE_NAME))
+		swapDirectories(getCompleteSettings(SETTINGS_FILE_NAME))
 		return err
 	} else if args[0] == SWAP_FLAG && len(args) > 1 {
 		err = errors.New("Flag -sw does not take any arguments.")
@@ -212,6 +211,6 @@ func swapDirectories(set Settings) error {
 	newDir := set.ActiveSettings[0].NewDirectory
 	tgkDir := set.Settings[0].Tgkdir
 	tgkfolder := set.Settings[0].Tgkfolder
-
+	fmt.Println(oldDir, newDir, tgkDir, tgkfolder)
 	return err
 }
