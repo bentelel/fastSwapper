@@ -7,7 +7,7 @@ import (
         "path/filepath"
         "log"
         "encoding/json"
-        "io/ioutil"
+        "io"
         "reflect"
         "github.com/oleiade/reflections"
         )
@@ -89,7 +89,7 @@ func unmarshalSettingsJson(filename string) Settings {
     log.Fatal(err)
   }
   defer jsonFile.Close()  
-  byteResult, err := ioutil.ReadAll(jsonFile)
+  byteResult, err := io.ReadAll(jsonFile)
   if err != nil{
     log.Fatal(err)
   }
@@ -106,7 +106,7 @@ func updateSettingsJson(filename string, data Settings) {
   if err != nil{
     log.Fatal(err)
   }
-  err = ioutil.WriteFile(filename, modifiedJson, 0644)
+  err = os.WriteFile(filename, modifiedJson, 0644)
   if err != nil{
     log.Fatal(err)
   }
@@ -118,7 +118,7 @@ func getSettings(filename string) Default {
 
 
 func setSettings(filename string, defaultToChange string, newValue string) {
-  unmarshaledJson := unmarshalSettingsJson(filename)//.Settings[0]
+  unmarshaledJson := unmarshalSettingsJson(filename)
 
   err := reflections.SetField(&unmarshaledJson.Settings[0], defaultToChange, newValue)
   if err != nil{
