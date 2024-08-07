@@ -40,6 +40,10 @@ func parseCLIargs(args []string) error {
 	if len(args) == 0 {
 		return err
 	}
+	if len(args) > 2 {
+		err = errors.New("No flag supports more than 2 arguments. At most run > fastSwapper -flag <argument for flag>")
+		return err
+	}
 	// set default path flag expects the syntax of fastSwapper -d <path to directory>
 	const SET_DEFAULT_PATH_FLAG = "-d"
 	if ContainsString(args, SET_DEFAULT_PATH_FLAG) {
