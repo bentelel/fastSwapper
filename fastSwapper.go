@@ -36,6 +36,7 @@ func HelpInformation() helpInformation {
 		"-o":  "Set the name of the old directory, under this name the current Addin will be saved on swap. > fastSwapper -o <name of directory you want>",
 		"-n":  "Set the name of the new directory, this will be used to remember the chosen name of the current Addin version, \n\t\tbecause we set that to the default directory and don't want the user to retype it every time. \n\t\t> fastSwapper -n <name of directory you want>",
 		"-h":  "Displays this help, use > fastSwapper -h <some other flag> to display only the help for a specific flag.",
+		"-sw": "Swap directories..",
 	}
 	return help
 }
@@ -46,8 +47,6 @@ func main() {
 	if err != nil {
 		log.Fatal(err.Error())
 	}
-	settings := getSettings("settings.json")
-	swapDirectories(settings)
 }
 
 func parseCLIargs(args []string) error {
@@ -71,6 +70,15 @@ func parseCLIargs(args []string) error {
 			fmt.Printf("flag: %s\t%s\n", k, v)
 			return err
 		}
+	}
+	const SWAP_FLAG = "-sw"
+	if args[0] == SWAP_FLAG && len(args) == 1 {
+		// add checking for correct dir names here
+		swapDirectories(getCompleteSettings("settings.json"))
+		return err
+	} else if args[0] == SWAP_FLAG && len(args) > 1 {
+		err = errors.New("Flag -sw does not take any arguments.")
+		return err
 	}
 	if len(args) > 2 {
 		err = errors.New("No flag supports more than 2 arguments. At most run > fastSwapper -flag <argument for flag>")
@@ -163,6 +171,10 @@ func updateSettingsJson(filename string, data Settings) {
 	if err != nil {
 		log.Fatal(err)
 	}
+}
+
+func getCompleteSettings(filename string) Settings {
+	return unmarshalSettingsJson(filename)
 }
 
 func getSettings(filename string) Default {
