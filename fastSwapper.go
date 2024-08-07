@@ -72,12 +72,12 @@ func parseCLIargs(args []string) error {
 		return err
 	}
 	const SWAP_FLAG = "-sw"
-	if args[0] == SWAP_FLAG && len(args) == 1 {
+	if args[0] == SWAP_FLAG && len(args) == 2 {
 		// add checking for correct dir names here
-		swapDirectories(getCompleteSettings(SETTINGS_FILE_NAME))
+		swapDirectories(getCompleteSettings(SETTINGS_FILE_NAME), args[1])
 		return err
-	} else if args[0] == SWAP_FLAG && len(args) > 1 {
-		err = errors.New("Flag -sw does not take any arguments.")
+	} else if args[0] == SWAP_FLAG && len(args) != 2 {
+		err = errors.New("Not the correct number of arguments supplied for -sw flag (1).")
 		return err
 	}
 	if len(args) > 2 {
@@ -205,12 +205,17 @@ func setActiveSettings(filename string, defaultToChange string, newValue string)
 	updateSettingsJson(filename, unmarshaledJson)
 }
 
-func swapDirectories(set Settings) error {
+func swapDirectories(set Settings, newDir string) error {
 	var err error
 	oldDir := set.ActiveSettings[0].OldDirectory
-	newDir := set.ActiveSettings[0].NewDirectory
+	newDirSet := set.ActiveSettings[0].NewDirectory
 	tgkDir := set.Settings[0].Tgkdir
 	tgkfolder := set.Settings[0].Tgkfolder
-	fmt.Println(oldDir, newDir, tgkDir, tgkfolder)
+	fmt.Println(oldDir, newDirSet, tgkDir, tgkfolder, newDir)
+	// add logic here that does the following:
+	// check: does newdir exist?
+	// 1. rename tgk dir to olddir
+	// 2. rename newDir folder to tgk dir
+	// 3. update oldDir setting with newDir
 	return err
 }
