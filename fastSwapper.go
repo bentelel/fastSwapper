@@ -20,8 +20,8 @@ type Default struct {
   Tgkdir string `json:"tgkdir"`
 }
 type ActiveSettings struct {
-  OldDirectory string `json:"olddirectory` 
-  NewDirectory string `json:"newdirectory`
+  OldDirectory string `json:"olddirectory"` 
+  NewDirectory string `json:"newdirectory"`
 }
 
 
