@@ -1,7 +1,13 @@
 {
-  "defaults":[
-    {
-      "tgkdir": "C:\\Tagetik\\Tagetik Excel .NET Client"
-    }
-  ]
+    "defaults": [
+        {
+            "tgkdir": "/home/lukas/Documents"
+        }
+    ],
+    "activesettings": [
+        {
+            "OldDirectory": "",
+            "NewDirectory": ""
+        }
+    ]
 }
