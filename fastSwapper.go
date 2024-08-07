@@ -30,7 +30,6 @@ func main() {
 		log.Fatal(err.Error())
 	}
 	set := getSettings("settings.json")
-
 	// setSettings("settings.json", "Tgkdir", "C:\\Tagetik\\Tagetik Excel .NET Client")
 
 	fmt.Println(GetAllInDir(set.Tgkdir))
@@ -90,6 +89,10 @@ func updateSettingsJson(filename string, data Settings) {
 
 func getSettings(filename string) Default {
 	return unmarshalSettingsJson(filename).Settings[0]
+}
+
+func getActiveSettings(filename string) ActiveSettings {
+	return unmarshalSettingsJson(filename).ActiveSettings[0]
 }
 
 func setSettings(filename string, defaultToChange string, newValue string) {

@@ -1,13 +1,13 @@
 {
     "defaults": [
         {
-            "tgkdir": "/home/lukas/Documents"
+            "tgkdir": "C:\\"
         }
     ],
     "activesettings": [
         {
-            "OldDirectory": "",
-            "NewDirectory": ""
+            "olddirectory": "test old",
+            "newdirectory": "test new"
         }
     ]
 }
