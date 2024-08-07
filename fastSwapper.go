@@ -51,6 +51,7 @@ func main() {
 
 func parseCLIargs(args []string) error {
 	var err error
+	const SETTINGS_FILE_NAME string = "settings.json"
 	if len(args) == 0 {
 		return err
 	}
@@ -74,7 +75,7 @@ func parseCLIargs(args []string) error {
 	const SWAP_FLAG = "-sw"
 	if args[0] == SWAP_FLAG && len(args) == 1 {
 		// add checking for correct dir names here
-		swapDirectories(getCompleteSettings("settings.json"))
+		swapDirectories(getCompleteSettingis(SETTINGS_FILE_NAME))
 		return err
 	} else if args[0] == SWAP_FLAG && len(args) > 1 {
 		err = errors.New("Flag -sw does not take any arguments.")
@@ -96,7 +97,7 @@ func parseCLIargs(args []string) error {
 			err = errors.New("Supplied path does not exist.")
 			return err
 		}
-		setSettings("settings.json", "Tgkdir", candidatePath)
+		setSettings(SETTINGS_FILE_NAME, "Tgkdir", candidatePath)
 	}
 	const SET_DEFAULT_WINPATH_FLAG = "-dw"
 	const TGK_DIR_DEFAULT_WIN = "C:\\Tagetik\\Tagetik Excel .NET Client"
@@ -105,7 +106,7 @@ func parseCLIargs(args []string) error {
 			err = errors.New("Flag -dw does not take any additional arguments.")
 			return err
 		}
-		setSettings("settings.json", "Tgkdir", TGK_DIR_DEFAULT_WIN)
+		setSettings(SETTINGS_FILE_NAME, "Tgkdir", TGK_DIR_DEFAULT_WIN)
 		fmt.Printf("%s set as tagetik addin directory.\n", TGK_DIR_DEFAULT_WIN)
 	}
 	// set old directory name flag expects the syntax of fastSwapper -o <name directory>
@@ -122,7 +123,7 @@ func parseCLIargs(args []string) error {
 			err = errors.New("Supplied name must not contain forbidden character.")
 			return err
 		}
-		setActiveSettings("settings.json", "OldDirectory", candidateName)
+		setActiveSettings(SETTINGS_FILE_NAME, "OldDirectory", candidateName)
 		return err
 	}
 	// set new directory name flag expects the syntax of fastSwapper -n <name directory>
@@ -138,7 +139,7 @@ func parseCLIargs(args []string) error {
 			err = errors.New("Supplied name must not contain forbidden character.")
 			return err
 		}
-		setActiveSettings("settings.json", "NewDirectory", candidateName)
+		setActiveSettings(SETTINGS_FILE_NAME, "NewDirectory", candidateName)
 		return err
 	}
 	return err
