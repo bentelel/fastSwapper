@@ -1,7 +1,8 @@
 {
     "defaults": [
         {
-            "tgkdir": "C:\\"
+            "tgkdir": "C:\\",
+            "tgkfolder": ""
         }
     ],
     "activesettings": [
