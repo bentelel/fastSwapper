@@ -16,7 +16,8 @@ type Settings struct {
 	ActiveSettings []ActiveSettings `json:"activesettings"`
 }
 type Default struct {
-	Tgkdir string `json:"tgkdir"`
+	Tgkdir    string `json:"tgkdir"`
+	Tgkfolder string `json:"tgkfolder"`
 }
 type ActiveSettings struct {
 	OldDirectory string `json:"olddirectory"`
@@ -45,9 +46,8 @@ func main() {
 	if err != nil {
 		log.Fatal(err.Error())
 	}
-	set := getSettings("settings.json")
-
-	fmt.Println(GetAllInDir(set.Tgkdir))
+	settings := getSettings("settings.json")
+	swapDirectories(settings)
 }
 
 func parseCLIargs(args []string) error {
@@ -191,4 +191,14 @@ func setActiveSettings(filename string, defaultToChange string, newValue string)
 		log.Fatal(err)
 	}
 	updateSettingsJson(filename, unmarshaledJson)
+}
+
+func swapDirectories(set Settings) error {
+	var err error
+	oldDir := set.ActiveSettings[0].OldDirectory
+	newDir := set.ActiveSettings[0].NewDirectory
+	tgkDir := set.Settings[0].Tgkdir
+	tgkfolder := set.Settings[0].Tgkfolder
+
+	return err
 }
