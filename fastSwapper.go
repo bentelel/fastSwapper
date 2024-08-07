@@ -54,7 +54,6 @@ func parseCLIargs(args []string) error {
 		}
 		setSettings("settings.json", "Tgkdir", candidatePath)
 	}
-
 	const SET_DEFAULT_WINPATH_FLAG = "-dw"
 	const TGK_DIR_DEFAULT_WIN = "C:\\Tagetik\\Tagetik Excel .NET Client"
 	if ContainsString(args, SET_DEFAULT_WINPATH_FLAG) {
@@ -64,6 +63,37 @@ func parseCLIargs(args []string) error {
 		}
 		setSettings("settings.json", "Tgkdir", TGK_DIR_DEFAULT_WIN)
 		fmt.Printf("%s set as tagetik addin directory.\n", TGK_DIR_DEFAULT_WIN)
+	}
+	// set old directory name flag expects the syntax of fastSwapper -o <name directory>
+	const SET_OLDDIR_NAME_FLAG = "-o"
+	FORBIDDEN_CHARS := [9]string{"\\", "/", ":", "*", "?", "\"", "<", ">", "|"}
+	if ContainsString(args, SET_OLDDIR_NAME_FLAG) {
+		if len(args) < 2 {
+			err = errors.New("No name for the old directory provided. Use fastSwapper -o <name of the old directory>.")
+			return err
+		}
+		candidateName := args[1]
+		// we should probably also check for characters not supported in directory names..
+		if ContainsStringWord(FORBIDDEN_CHARS[:], candidateName) {
+			err = errors.New("Supplied name must not contain forbidden character.")
+			return err
+		}
+		setActiveSettings("settings.json", "OldDirectory", candidateName)
+	}
+	// set new directory name flag expects the syntax of fastSwapper -n <name directory>
+	const SET_NEWDIR_NAME_FLAG = "-n"
+	if ContainsString(args, SET_NEWDIR_NAME_FLAG) {
+		if len(args) < 2 {
+			err = errors.New("No name for the new directory provided. Use fastSwapper -n <name of the new directory>.")
+			return err
+		}
+		candidateName := args[1]
+		// we should probably also check for characters not supported in directory names..
+		if ContainsStringWord(FORBIDDEN_CHARS[:], candidateName) {
+			err = errors.New("Supplied name must not contain forbidden character.")
+			return err
+		}
+		setActiveSettings("settings.json", "NewDirectory", candidateName)
 	}
 	return err
 }
@@ -109,6 +139,16 @@ func setSettings(filename string, defaultToChange string, newValue string) {
 	unmarshaledJson := unmarshalSettingsJson(filename)
 
 	err := reflections.SetField(&unmarshaledJson.Settings[0], defaultToChange, newValue)
+	if err != nil {
+		log.Fatal(err)
+	}
+	updateSettingsJson(filename, unmarshaledJson)
+}
+
+func setActiveSettings(filename string, defaultToChange string, newValue string) {
+	unmarshaledJson := unmarshalSettingsJson(filename)
+
+	err := reflections.SetField(&unmarshaledJson.ActiveSettings[0], defaultToChange, newValue)
 	if err != nil {
 		log.Fatal(err)
 	}

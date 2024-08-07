@@ -20,6 +20,16 @@ func ContainsString(s []string, e string) bool {
 	return false
 }
 
+func ContainsStringWord(sliceToCheckAgainst []string, wordToCheck string) bool {
+	// this is probably highly inefficient, as we are looping over the complete list for each rune in wordToCheck, but whatever, well refactor later
+	for _, r := range wordToCheck {
+		if ContainsString(sliceToCheckAgainst, string(r)) {
+			return true
+		}
+	}
+	return false
+}
+
 func IsDir(path string) bool {
 	if _, err := os.Stat(path); os.IsNotExist(err) {
 		return false
