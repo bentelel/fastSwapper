@@ -51,13 +51,17 @@ func main() {
 
 func parseCLIargs(args []string) error {
 	var err error
+	help := HelpInformation()
 	const SETTINGS_FILE_NAME string = "settings.json"
 	if len(args) == 0 {
 		return err
 	}
+	if help.availableFlagsWithDesc[args[0]] == "" {
+		err = errors.New("Flag does not exist")
+		return err
+	}
 	const HELP_FLAG = "-h"
 	if args[0] == HELP_FLAG && len(args) == 2 {
-		help := HelpInformation()
 		if help.availableFlagsWithDesc[args[1]] == "" {
 			err = errors.New("Flag does not exist: " + args[1])
 			return err
