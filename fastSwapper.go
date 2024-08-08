@@ -222,7 +222,6 @@ func swapDirectories(set Settings, newDirName string) error {
 	// add logic here that does the following:
 	// check: does newdir exist?
 	newDirPath := tgkDir + "\\" + newDirName
-	fmt.Printf("new dir path %v", newDirPath)
 	if !IsDir(newDirPath) {
 		err = errors.New("Folder to swap in does not exist.")
 		return err
