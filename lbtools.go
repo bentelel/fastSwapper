@@ -68,3 +68,13 @@ func GetAllInDir(dir string) []string {
 	}
 	return result
 }
+
+func All[T any](ts []T, pred func(T) bool) bool {
+	// Takes in a slice and function (which returns a bool) and does the func check on all elements of slice
+	for _, t := range ts {
+		if !pred(t) {
+			return false
+		}
+	}
+	return true
+}
