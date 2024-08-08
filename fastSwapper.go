@@ -34,7 +34,6 @@ func HelpInformation() helpInformation {
 		"-dw": "Reset default tagetik directory to the Windows one.",
 		"-tf": "Set Tagetik Addin Folder Name",
 		"-o":  "Set the name of the old directory, under this name the current Addin will be saved on swap. > fastSwapper -o <name of directory you want>",
-		"-n":  "Set the name of the new directory, this will be used to remember the chosen name of the current Addin version, \n\t\tbecause we set that to the default directory and don't want the user to retype it every time. \n\t\t> fastSwapper -n <name of directory you want>",
 		"-h":  "Displays this help, use > fastSwapper -h <some other flag> to display only the help for a specific flag.",
 		"-sw": "Swap directories..",
 	}
@@ -60,7 +59,6 @@ func parseCLIargs(args []string) error {
 	const SET_DEFAULT_WINPATH_FLAG = "-dw"
 	const SET_TGK_FOLDER_FLAG = "-tf"
 	const SET_OLDDIR_NAME_FLAG = "-o"
-	const SET_NEWDIR_NAME_FLAG = "-n"
 	help := HelpInformation()
 	// concatenate all args after 1 (including 1) into 1
 	if len(args) > 1 {
@@ -150,21 +148,6 @@ func parseCLIargs(args []string) error {
 			return err
 		}
 		setSettings(SETTINGS_FILE_NAME, "Tgkfolder", candidateName)
-		return err
-	}
-	// set new directory name flag expects the syntax of fastSwapper -n <name directory>
-	if ContainsString(args, SET_NEWDIR_NAME_FLAG) {
-		if len(args) < 2 {
-			err = errors.New("No name for the new directory provided. Use fastSwapper -n <name of the new directory>.")
-			return err
-		}
-		candidateName := args[1]
-		// we should probably also check for characters not supported in directory names..
-		if ContainsStringWord(FORBIDDEN_CHARS[:], candidateName) {
-			err = errors.New("Supplied name must not contain forbidden character.")
-			return err
-		}
-		setActiveSettings(SETTINGS_FILE_NAME, "NewDirectory", candidateName)
 		return err
 	}
 	return err
