@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
+	"strings"
 )
 
 func Typeof(v interface{}) string {
@@ -77,4 +78,21 @@ func All[T any](ts []T, pred func(T) bool) bool {
 		}
 	}
 	return true
+}
+
+func CombineString(s []string) (string, error) {
+	var err error
+	var ret string
+	for _, w := range s {
+		ret += w + " "
+	}
+	ret = TrimSuffix(ret, " ")
+	return ret, err
+}
+
+func TrimSuffix(s, suffix string) string {
+	if strings.HasSuffix(s, suffix) {
+		s = s[:len(s)-len(suffix)]
+	}
+	return s
 }

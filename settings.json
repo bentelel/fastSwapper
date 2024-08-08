@@ -1,14 +1,14 @@
 {
     "defaults": [
         {
-            "tgkdir": "C:\\",
-            "tgkfolder": ""
+            "tgkdir": "C:\\go_testing\\fastSwapper\\testFolder",
+            "tgkfolder": "Excel Add In"
         }
     ],
     "activesettings": [
         {
-            "olddirectory": "test old",
-            "newdirectory": "test new"
+            "olddirectory": "test3",
+            "newdirectory": "test1"
         }
     ]
 }

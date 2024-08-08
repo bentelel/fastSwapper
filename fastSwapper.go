@@ -33,6 +33,7 @@ func HelpInformation() helpInformation {
 	help.availableFlagsWithDesc = map[string]string{
 		"-d":  "Set default tagetik directory > fastSwapper -d <absolute path to directory>",
 		"-dw": "Reset default tagetik directory to the Windows one.",
+		"-tf": "Set Tagetik Addin Folder Name",
 		"-o":  "Set the name of the old directory, under this name the current Addin will be saved on swap. > fastSwapper -o <name of directory you want>",
 		"-n":  "Set the name of the new directory, this will be used to remember the chosen name of the current Addin version, \n\t\tbecause we set that to the default directory and don't want the user to retype it every time. \n\t\t> fastSwapper -n <name of directory you want>",
 		"-h":  "Displays this help, use > fastSwapper -h <some other flag> to display only the help for a specific flag.",
@@ -51,8 +52,23 @@ func main() {
 
 func parseCLIargs(args []string) error {
 	var err error
-	help := HelpInformation()
 	const SETTINGS_FILE_NAME string = "settings.json"
+	const TGK_DIR_DEFAULT_WIN = "C:\\Tagetik\\Tagetik Excel .NET Client"
+	FORBIDDEN_CHARS := [9]string{"\\", "/", ":", "*", "?", "\"", "<", ">", "|"}
+	const HELP_FLAG = "-h"
+	const SWAP_FLAG = "-sw"
+	const SET_DEFAULT_PATH_FLAG = "-d"
+	const SET_DEFAULT_WINPATH_FLAG = "-dw"
+	const SET_TGK_FOLDER_FLAG = "-tf"
+	const SET_OLDDIR_NAME_FLAG = "-o"
+	const SET_NEWDIR_NAME_FLAG = "-n"
+	help := HelpInformation()
+	// concatenate all args after 1 (including 1) into 1
+	args[1], err = CombineString(args[1:])
+	args = args[:2]
+	if err != nil {
+		return err
+	}
 	if len(args) == 0 {
 		return err
 	}
@@ -60,7 +76,6 @@ func parseCLIargs(args []string) error {
 		err = errors.New("Flag does not exist")
 		return err
 	}
-	const HELP_FLAG = "-h"
 	if args[0] == HELP_FLAG && len(args) == 2 {
 		if help.availableFlagsWithDesc[args[1]] == "" {
 			err = errors.New("Flag does not exist: " + args[1])
@@ -75,7 +90,6 @@ func parseCLIargs(args []string) error {
 		}
 		return err
 	}
-	const SWAP_FLAG = "-sw"
 	if args[0] == SWAP_FLAG && len(args) == 2 {
 		// add checking for correct dir names here
 		swapDirectories(getCompleteSettings(SETTINGS_FILE_NAME), args[1])
@@ -89,7 +103,6 @@ func parseCLIargs(args []string) error {
 		return err
 	}
 	// set default path flag expects the syntax of fastSwapper -d <path to directory>
-	const SET_DEFAULT_PATH_FLAG = "-d"
 	if ContainsString(args, SET_DEFAULT_PATH_FLAG) {
 		if len(args) < 2 {
 			err = errors.New("No path provided. Use fastSwapper -d <path to default dir>.")
@@ -102,8 +115,6 @@ func parseCLIargs(args []string) error {
 		}
 		setSettings(SETTINGS_FILE_NAME, "Tgkdir", candidatePath)
 	}
-	const SET_DEFAULT_WINPATH_FLAG = "-dw"
-	const TGK_DIR_DEFAULT_WIN = "C:\\Tagetik\\Tagetik Excel .NET Client"
 	if ContainsString(args, SET_DEFAULT_WINPATH_FLAG) {
 		if len(args) > 1 {
 			err = errors.New("Flag -dw does not take any additional arguments.")
@@ -112,9 +123,6 @@ func parseCLIargs(args []string) error {
 		setSettings(SETTINGS_FILE_NAME, "Tgkdir", TGK_DIR_DEFAULT_WIN)
 		fmt.Printf("%s set as tagetik addin directory.\n", TGK_DIR_DEFAULT_WIN)
 	}
-	// set old directory name flag expects the syntax of fastSwapper -o <name directory>
-	const SET_OLDDIR_NAME_FLAG = "-o"
-	FORBIDDEN_CHARS := [9]string{"\\", "/", ":", "*", "?", "\"", "<", ">", "|"}
 	if ContainsString(args, SET_OLDDIR_NAME_FLAG) {
 		if len(args) < 2 {
 			err = errors.New("No name for the old directory provided. Use fastSwapper -o <name of the old directory>.")
@@ -129,8 +137,21 @@ func parseCLIargs(args []string) error {
 		setActiveSettings(SETTINGS_FILE_NAME, "OldDirectory", candidateName)
 		return err
 	}
+	if ContainsString(args, SET_TGK_FOLDER_FLAG) {
+		if len(args) < 2 {
+			err = errors.New("No name for the addin directory provided. Use fastSwapper -tf <name of the old directory>.")
+			return err
+		}
+		candidateName := args[1]
+		// we should probably also check for characters not supported in directory names..
+		if ContainsStringWord(FORBIDDEN_CHARS[:], candidateName) {
+			err = errors.New("Supplied name must not contain forbidden character.")
+			return err
+		}
+		setSettings(SETTINGS_FILE_NAME, "Tgkfolder", candidateName)
+		return err
+	}
 	// set new directory name flag expects the syntax of fastSwapper -n <name directory>
-	const SET_NEWDIR_NAME_FLAG = "-n"
 	if ContainsString(args, SET_NEWDIR_NAME_FLAG) {
 		if len(args) < 2 {
 			err = errors.New("No name for the new directory provided. Use fastSwapper -n <name of the new directory>.")
@@ -209,17 +230,34 @@ func setActiveSettings(filename string, defaultToChange string, newValue string)
 	updateSettingsJson(filename, unmarshaledJson)
 }
 
-func swapDirectories(set Settings, newDir string) error {
+func swapDirectories(set Settings, newDirName string) error {
 	var err error
-	oldDir := set.ActiveSettings[0].OldDirectory
-	newDirSet := set.ActiveSettings[0].NewDirectory
+	oldDirName := set.ActiveSettings[0].OldDirectory
 	tgkDir := set.Settings[0].Tgkdir
 	tgkfolder := set.Settings[0].Tgkfolder
-	fmt.Println(oldDir, newDirSet, tgkDir, tgkfolder, newDir)
 	// add logic here that does the following:
 	// check: does newdir exist?
+	newDirPath := tgkDir + newDirName
+	if !IsDir(newDirPath) {
+		err = errors.New("Folder to swap in does not exist.")
+		return err
+	}
+	tgkDirPath := tgkDir + tgkfolder
+	oldDirPath := tgkDir + oldDirName
+	// debug -- remove later
+	fmt.Printf("tgkDirPath:\t %v\n", tgkDirPath)
+	fmt.Printf("newDirPath:\t %v\n", newDirPath)
+	fmt.Printf("oldDirPath:\t %v\n", oldDirPath)
 	// 1. rename tgk dir to olddir
+	err = os.Rename(tgkDirPath, oldDirPath)
+	if err != nil {
+		return err
+	}
 	// 2. rename newDir folder to tgk dir
+	err = os.Rename(newDirPath, tgkDirPath)
+	if err != nil {
+		return err
+	}
 	// 3. update oldDir setting with newDir
 	return err
 }
