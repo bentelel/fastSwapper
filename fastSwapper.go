@@ -21,7 +21,6 @@ type Default struct {
 }
 type ActiveSettings struct {
 	OldDirectory string `json:"olddirectory"`
-	NewDirectory string `json:"newdirectory"`
 }
 
 type helpInformation struct {
@@ -64,8 +63,10 @@ func parseCLIargs(args []string) error {
 	const SET_NEWDIR_NAME_FLAG = "-n"
 	help := HelpInformation()
 	// concatenate all args after 1 (including 1) into 1
-	args[1], err = CombineString(args[1:])
-	args = args[:2]
+	if len(args) > 1 {
+		args[1], err = CombineString(args[1:])
+		args = args[:2]
+	}
 	if err != nil {
 		return err
 	}
@@ -92,7 +93,7 @@ func parseCLIargs(args []string) error {
 	}
 	if args[0] == SWAP_FLAG && len(args) == 2 {
 		// add checking for correct dir names here
-		swapDirectories(getCompleteSettings(SETTINGS_FILE_NAME), args[1])
+		err = swapDirectories(getCompleteSettings(SETTINGS_FILE_NAME), args[1])
 		return err
 	} else if args[0] == SWAP_FLAG && len(args) != 2 {
 		err = errors.New("Not the correct number of arguments supplied for -sw flag (1).")
@@ -237,17 +238,14 @@ func swapDirectories(set Settings, newDirName string) error {
 	tgkfolder := set.Settings[0].Tgkfolder
 	// add logic here that does the following:
 	// check: does newdir exist?
-	newDirPath := tgkDir + newDirName
+	newDirPath := tgkDir + "\\" + newDirName
+	fmt.Printf("new dir path %v", newDirPath)
 	if !IsDir(newDirPath) {
 		err = errors.New("Folder to swap in does not exist.")
 		return err
 	}
-	tgkDirPath := tgkDir + tgkfolder
-	oldDirPath := tgkDir + oldDirName
-	// debug -- remove later
-	fmt.Printf("tgkDirPath:\t %v\n", tgkDirPath)
-	fmt.Printf("newDirPath:\t %v\n", newDirPath)
-	fmt.Printf("oldDirPath:\t %v\n", oldDirPath)
+	tgkDirPath := tgkDir + "\\" + tgkfolder
+	oldDirPath := tgkDir + "\\" + oldDirName
 	// 1. rename tgk dir to olddir
 	err = os.Rename(tgkDirPath, oldDirPath)
 	if err != nil {
