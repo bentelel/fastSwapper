@@ -16,7 +16,8 @@ type Settings struct {
 	ActiveSettings []ActiveSettings `json:"activesettings"`
 }
 type Default struct {
-	Tgkdir string `json:"tgkdir"`
+	Tgkdir    string `json:"tgkdir"`
+	Tgkfolder string `json:"tgkfolder"`
 }
 type ActiveSettings struct {
 	OldDirectory string `json:"olddirectory"`
@@ -35,6 +36,7 @@ func HelpInformation() helpInformation {
 		"-o":  "Set the name of the old directory, under this name the current Addin will be saved on swap. > fastSwapper -o <name of directory you want>",
 		"-n":  "Set the name of the new directory, this will be used to remember the chosen name of the current Addin version, \n\t\tbecause we set that to the default directory and don't want the user to retype it every time. \n\t\t> fastSwapper -n <name of directory you want>",
 		"-h":  "Displays this help, use > fastSwapper -h <some other flag> to display only the help for a specific flag.",
+		"-sw": "Swap directories..",
 	}
 	return help
 }
@@ -45,13 +47,11 @@ func main() {
 	if err != nil {
 		log.Fatal(err.Error())
 	}
-	set := getSettings("settings.json")
-
-	fmt.Println(GetAllInDir(set.Tgkdir))
 }
 
 func parseCLIargs(args []string) error {
 	var err error
+	const SETTINGS_FILE_NAME string = "settings.json"
 	if len(args) == 0 {
 		return err
 	}
@@ -64,13 +64,21 @@ func parseCLIargs(args []string) error {
 		}
 		fmt.Printf("flag: %s\t%s\n", args[1], help.availableFlagsWithDesc[args[1]])
 		return err
-	}
-	if args[0] == HELP_FLAG {
+	} else if args[0] == HELP_FLAG && len(args) == 1 {
 		help := HelpInformation()
 		for k, v := range help.availableFlagsWithDesc {
 			fmt.Printf("flag: %s\t%s\n", k, v)
-			return err
 		}
+		return err
+	}
+	const SWAP_FLAG = "-sw"
+	if args[0] == SWAP_FLAG && len(args) == 2 {
+		// add checking for correct dir names here
+		swapDirectories(getCompleteSettings(SETTINGS_FILE_NAME), args[1])
+		return err
+	} else if args[0] == SWAP_FLAG && len(args) != 2 {
+		err = errors.New("Not the correct number of arguments supplied for -sw flag (1).")
+		return err
 	}
 	if len(args) > 2 {
 		err = errors.New("No flag supports more than 2 arguments. At most run > fastSwapper -flag <argument for flag>")
@@ -88,7 +96,7 @@ func parseCLIargs(args []string) error {
 			err = errors.New("Supplied path does not exist.")
 			return err
 		}
-		setSettings("settings.json", "Tgkdir", candidatePath)
+		setSettings(SETTINGS_FILE_NAME, "Tgkdir", candidatePath)
 	}
 	const SET_DEFAULT_WINPATH_FLAG = "-dw"
 	const TGK_DIR_DEFAULT_WIN = "C:\\Tagetik\\Tagetik Excel .NET Client"
@@ -97,7 +105,7 @@ func parseCLIargs(args []string) error {
 			err = errors.New("Flag -dw does not take any additional arguments.")
 			return err
 		}
-		setSettings("settings.json", "Tgkdir", TGK_DIR_DEFAULT_WIN)
+		setSettings(SETTINGS_FILE_NAME, "Tgkdir", TGK_DIR_DEFAULT_WIN)
 		fmt.Printf("%s set as tagetik addin directory.\n", TGK_DIR_DEFAULT_WIN)
 	}
 	// set old directory name flag expects the syntax of fastSwapper -o <name directory>
@@ -114,7 +122,7 @@ func parseCLIargs(args []string) error {
 			err = errors.New("Supplied name must not contain forbidden character.")
 			return err
 		}
-		setActiveSettings("settings.json", "OldDirectory", candidateName)
+		setActiveSettings(SETTINGS_FILE_NAME, "OldDirectory", candidateName)
 		return err
 	}
 	// set new directory name flag expects the syntax of fastSwapper -n <name directory>
@@ -130,7 +138,7 @@ func parseCLIargs(args []string) error {
 			err = errors.New("Supplied name must not contain forbidden character.")
 			return err
 		}
-		setActiveSettings("settings.json", "NewDirectory", candidateName)
+		setActiveSettings(SETTINGS_FILE_NAME, "NewDirectory", candidateName)
 		return err
 	}
 	return err
@@ -165,6 +173,10 @@ func updateSettingsJson(filename string, data Settings) {
 	}
 }
 
+func getCompleteSettings(filename string) Settings {
+	return unmarshalSettingsJson(filename)
+}
+
 func getSettings(filename string) Default {
 	return unmarshalSettingsJson(filename).Settings[0]
 }
@@ -191,4 +203,19 @@ func setActiveSettings(filename string, defaultToChange string, newValue string)
 		log.Fatal(err)
 	}
 	updateSettingsJson(filename, unmarshaledJson)
+}
+
+func swapDirectories(set Settings, newDir string) error {
+	var err error
+	oldDir := set.ActiveSettings[0].OldDirectory
+	newDirSet := set.ActiveSettings[0].NewDirectory
+	tgkDir := set.Settings[0].Tgkdir
+	tgkfolder := set.Settings[0].Tgkfolder
+	fmt.Println(oldDir, newDirSet, tgkDir, tgkfolder, newDir)
+	// add logic here that does the following:
+	// check: does newdir exist?
+	// 1. rename tgk dir to olddir
+	// 2. rename newDir folder to tgk dir
+	// 3. update oldDir setting with newDir
+	return err
 }
