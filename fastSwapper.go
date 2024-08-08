@@ -215,6 +215,7 @@ func setActiveSettings(filename string, defaultToChange string, newValue string)
 }
 
 func swapDirectories(set Settings, newDirName string, settingsFileName string) error {
+	// the fact that I have to pass in the settings file name here is bad imo.. maybe refactor lator.
 	var err error
 	oldDirName := set.ActiveSettings[0].OldDirectory
 	tgkDir := set.Settings[0].Tgkdir
