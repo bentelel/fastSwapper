@@ -12,8 +12,8 @@ import (
 )
 
 type Settings struct {
-	Settings       []Default        `json:"defaults"`
-	ActiveSettings []ActiveSettings `json:"activesettings"`
+	Defaults       Default        `json:"defaults"`
+	ActiveSettings ActiveSettings `json:"activesettings"`
 }
 type Default struct {
 	Tgkdir    string `json:"tgkdir"`
@@ -95,7 +95,7 @@ func parseCLIargs(args []string) error {
 	}
 	if args[0] == SWAP_FLAG && len(args) == 2 {
 		// add checking for correct dir names here
-		err = swapDirectories(getCompleteSettings(SETTINGS_FILE_NAME), args[1], SETTINGS_FILE_NAME)
+		err = swapDirectories(GetCompleteSettings(SETTINGS_FILE_NAME), args[1], SETTINGS_FILE_NAME)
 		return err
 	} else if args[0] == SWAP_FLAG && len(args) != 2 {
 		err = errors.New("Not the correct number of arguments supplied for -sw flag (1).")
@@ -186,22 +186,22 @@ func updateSettingsJson(filename string, data Settings) {
 	}
 }
 
-func getCompleteSettings(filename string) Settings {
+func GetCompleteSettings(filename string) Settings {
 	return unmarshalSettingsJson(filename)
 }
 
 func getSettings(filename string) Default {
-	return unmarshalSettingsJson(filename).Settings[0]
+	return unmarshalSettingsJson(filename).Defaults
 }
 
 func getActiveSettings(filename string) ActiveSettings {
-	return unmarshalSettingsJson(filename).ActiveSettings[0]
+	return unmarshalSettingsJson(filename).ActiveSettings
 }
 
 func setSettings(filename string, defaultToChange string, newValue string) {
 	unmarshaledJson := unmarshalSettingsJson(filename)
 
-	err := reflections.SetField(&unmarshaledJson.Settings[0], defaultToChange, newValue)
+	err := reflections.SetField(&unmarshaledJson.Defaults, defaultToChange, newValue)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -211,7 +211,7 @@ func setSettings(filename string, defaultToChange string, newValue string) {
 func setActiveSettings(filename string, defaultToChange string, newValue string) {
 	unmarshaledJson := unmarshalSettingsJson(filename)
 
-	err := reflections.SetField(&unmarshaledJson.ActiveSettings[0], defaultToChange, newValue)
+	err := reflections.SetField(&unmarshaledJson.ActiveSettings, defaultToChange, newValue)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -221,9 +221,9 @@ func setActiveSettings(filename string, defaultToChange string, newValue string)
 func swapDirectories(set Settings, newDirName string, settingsFileName string) error {
 	// the fact that I have to pass in the settings file name here is bad imo.. maybe refactor lator.
 	var err error
-	oldDirName := set.ActiveSettings[0].OldDirectory
-	tgkDir := set.Settings[0].Tgkdir
-	tgkfolder := set.Settings[0].Tgkfolder
+	oldDirName := set.ActiveSettings.OldDirectory
+	tgkDir := set.Defaults.Tgkdir
+	tgkfolder := set.Defaults.Tgkfolder
 	// add logic here that does the following:
 	// check: does newdir exist?
 	newDirPath := tgkDir + "\\" + newDirName

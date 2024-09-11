@@ -15,9 +15,10 @@ type model struct {
 }
 
 // initialization of a new model
-func initialModel() model {
+func initialModel(dir string) model {
 	return model{
-		choices:  []string{"Buy carrots", "Buy celery", "Do somthing else"},
+		// choices:  []string{"Buy carrots", "Buy celery", "Do somthing else"},
+		choices:  GetDirsInDir(dir),
 		selected: make(map[int]struct{}),
 	}
 }
@@ -99,7 +100,8 @@ func (m model) View() string {
 }
 
 func runTui() {
-	p := tea.NewProgram(initialModel())
+	tgkDir := GetCompleteSettings("settings.json").Defaults.Tgkdir
+	p := tea.NewProgram(initialModel(tgkDir))
 	if _, err := p.Run(); err != nil {
 		fmt.Printf("Something went wrong: %s", err)
 		os.Exit(1)
