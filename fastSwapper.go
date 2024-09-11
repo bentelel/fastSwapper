@@ -49,16 +49,20 @@ func main() {
 }
 
 func parseCLIargs(args []string) error {
-	var err error
-	const SETTINGS_FILE_NAME string = "settings.json"
-	const TGK_DIR_DEFAULT_WIN = "C:\\Tagetik\\Tagetik Excel .NET Client"
-	FORBIDDEN_CHARS := [9]string{"\\", "/", ":", "*", "?", "\"", "<", ">", "|"}
-	const HELP_FLAG = "-h"
-	const SWAP_FLAG = "-sw"
-	const SET_DEFAULT_PATH_FLAG = "-d"
-	const SET_DEFAULT_WINPATH_FLAG = "-dw"
-	const SET_TGK_FOLDER_FLAG = "-tf"
-	const SET_OLDDIR_NAME_FLAG = "-o"
+	var (
+		err             error
+		FORBIDDEN_CHARS [9]string = [9]string{"\\", "/", ":", "*", "?", "\"", "<", ">", "|"}
+	)
+	const (
+		SETTINGS_FILE_NAME       string = "settings.json"
+		TGK_DIR_DEFAULT_WIN             = "C:\\Tagetik\\Tagetik Excel .NET Client"
+		HELP_FLAG                       = "-h"
+		SWAP_FLAG                       = "-sw"
+		SET_DEFAULT_PATH_FLAG           = "-d"
+		SET_DEFAULT_WINPATH_FLAG        = "-dw"
+		SET_TGK_FOLDER_FLAG             = "-tf"
+		SET_OLDDIR_NAME_FLAG            = "-o"
+	)
 	help := HelpInformation()
 	// concatenate all args after 1 (including 1) into 1
 	if len(args) > 1 {
