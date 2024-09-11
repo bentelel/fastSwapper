@@ -1,9 +1,8 @@
 package main
 
-import (
-	"os"
-)
+//"os"
 
 func main() {
-	RunSwapper(os.Args)
+	// RunSwapper(os.Args)
+	runTui()
 }
