@@ -40,9 +40,9 @@ func HelpInformation() helpInformation {
 	return help
 }
 
-func main() {
-	args := os.Args[1:]
-	err := parseCLIargs(args)
+func RunSwapper(args []string) {
+	// try parsing the cli args which have been forwarded from the entry point. We omit arg 0 because thats only the path of the program.
+	err := parseCLIargs(args[1:])
 	if err != nil {
 		log.Fatal(err.Error())
 	}
