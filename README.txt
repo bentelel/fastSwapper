@@ -12,4 +12,9 @@ What does it do?
     "Customer1" should hold all files needed by the Tagetik Excel Addin for the Tagetik Version of Customer1. 
     The app will then rename the old Tagetik Excel .NET Client folder to a chosen name (i.e. "Customer2") and rename "Customer1"
     to "Tagetik Excel .NET Client".
-    The app should also close down MS Excel if it is open and reopen it after swapping.
+    The app should also close down MS Excel if it is open and reopen it after swapping. 
+
+
+To Do:
+  Test with real data.
+  Make it so that excel is killed and restarted on swap.

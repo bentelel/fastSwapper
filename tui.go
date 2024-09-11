@@ -7,7 +7,10 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-const SETTINGSFILENAME string = "settings.json"
+const (
+	SETTINGSFILENAME string = "settings.json"
+	SWAPFLAG                = "-sw"
+)
 
 // model holds the state
 type model struct {
@@ -15,15 +18,17 @@ type model struct {
 	cursor       int
 	selected     map[int]struct{}
 	lastSelected *int
+	active       string
 }
 
 // initialization of a new model
-func initialModel(dirs []string) model {
+func initialModel(dirs []string, activeVersion string) model {
 	return model{
 		// choices:  []string{"Buy carrots", "Buy celery", "Do somthing else"},
 		choices:      dirs,
 		selected:     make(map[int]struct{}),
 		lastSelected: nil,
+		active:       activeVersion,
 	}
 }
 
@@ -43,7 +48,22 @@ func (m model) UpdateChoices() tea.Model {
 	m.choices = dirsWithOutTgkFolder
 	m.lastSelected = nil
 	m.selected = make(map[int]struct{})
+	m.active = settings.ActiveSettings.OldDirectory
 	return m
+}
+
+func (m model) swapFolders() error {
+	var err error = nil
+	// for now lets basically build the CLI args in here as string
+	bogusProgramName := "prog"
+	swapFlag := SWAPFLAG
+	target := m.choices[m.cursor]
+	args := []string{bogusProgramName, swapFlag, target}
+	err = RunSwapper(args)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
@@ -59,6 +79,10 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, tea.Quit
 
 		case "u":
+			// if any entry is selected, make the swapping.
+			if len(m.selected) > 0 {
+				m.swapFolders()
+			}
 			return m.UpdateChoices(), nil
 
 			// The "up" and "k" keys move the cursor up
@@ -98,8 +122,8 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 func (m model) View() string {
 	// The header
-	s := "Please chose which version to swap in.\n\n"
-
+	s := "Please chose which version to swap in.\n"
+	s += "Currently active: " + m.active + "\n\n"
 	// Iterate over our choices
 	for i, choice := range m.choices {
 
@@ -132,7 +156,8 @@ func runTui() {
 	tgkFolder := settings.Defaults.Tgkfolder
 	dirs := GetDirsInDir(tgkDir)
 	dirsWithOutTgkFolder := Remove(dirs, tgkFolder)
-	p := tea.NewProgram(initialModel(dirsWithOutTgkFolder))
+	activeVersion := settings.ActiveSettings.OldDirectory
+	p := tea.NewProgram(initialModel(dirsWithOutTgkFolder, activeVersion))
 	if _, err := p.Run(); err != nil {
 		fmt.Printf("Something went wrong: %s", err)
 		os.Exit(1)
