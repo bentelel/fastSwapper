@@ -32,6 +32,20 @@ func (m model) Init() tea.Cmd {
 	return nil
 }
 
+// this should be used to update the model > when we swap folders the list of choices needs to be refreshed
+// this currently keeps the cursor position and selection! if the order of choices would change this would lead to wrong highlighting
+func (m model) UpdateChoices() tea.Model {
+	settings := GetCompleteSettings(SETTINGSFILENAME)
+	tgkDir := settings.Defaults.Tgkdir
+	tgkFolder := settings.Defaults.Tgkfolder
+	dirs := GetDirsInDir(tgkDir)
+	dirsWithOutTgkFolder := Remove(dirs, tgkFolder)
+	m.choices = dirsWithOutTgkFolder
+	m.lastSelected = nil
+	m.selected = make(map[int]struct{})
+	return m
+}
+
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	// Is it a key press?
@@ -43,6 +57,9 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		// These keys should exit the program.
 		case "ctrl+c", "q":
 			return m, tea.Quit
+
+		case "u":
+			return m.UpdateChoices(), nil
 
 			// The "up" and "k" keys move the cursor up
 		case "up", "k":
@@ -103,7 +120,7 @@ func (m model) View() string {
 	}
 
 	// The footer
-	s += "\nPress q to quit.\n"
+	s += "\nPress q to quit.\t Press u to update.\n"
 
 	// Send the UI for rendering
 	return s
