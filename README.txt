@@ -18,3 +18,4 @@ What does it do?
 To Do:
   Test with real data.
   Make it so that excel is killed and restarted on swap.
+  Add "new entry"-mode > enter new name (system then should copy and not move the current main folder so that the user can go to excel and set up the new connection etc.)
