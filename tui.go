@@ -7,19 +7,23 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
+const SETTINGSFILENAME string = "settings.json"
+
 // model holds the state
 type model struct {
-	choices  []string
-	cursor   int
-	selected map[int]struct{}
+	choices      []string
+	cursor       int
+	selected     map[int]struct{}
+	lastSelected *int
 }
 
 // initialization of a new model
-func initialModel(dir string) model {
+func initialModel(dirs []string) model {
 	return model{
 		// choices:  []string{"Buy carrots", "Buy celery", "Do somthing else"},
-		choices:  GetDirsInDir(dir),
-		selected: make(map[int]struct{}),
+		choices:      dirs,
+		selected:     make(map[int]struct{}),
+		lastSelected: nil,
 	}
 }
 
@@ -40,7 +44,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "ctrl+c", "q":
 			return m, tea.Quit
 
-		// The "up" and "k" keys move the cursor up
+			// The "up" and "k" keys move the cursor up
 		case "up", "k":
 			if m.cursor > 0 {
 				m.cursor--
@@ -58,8 +62,14 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			_, ok := m.selected[m.cursor]
 			if ok {
 				delete(m.selected, m.cursor)
+				m.lastSelected = nil
 			} else {
 				m.selected[m.cursor] = struct{}{}
+				// this makes it so that only every one entry in the model is selected.
+				if m.lastSelected != nil {
+					delete(m.selected, *m.lastSelected)
+				}
+				m.lastSelected = &m.cursor
 			}
 		}
 	}
@@ -71,7 +81,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 func (m model) View() string {
 	// The header
-	s := "What should we buy at the market?\n\n"
+	s := "Please chose which version to swap in.\n\n"
 
 	// Iterate over our choices
 	for i, choice := range m.choices {
@@ -100,8 +110,12 @@ func (m model) View() string {
 }
 
 func runTui() {
-	tgkDir := GetCompleteSettings("settings.json").Defaults.Tgkdir
-	p := tea.NewProgram(initialModel(tgkDir))
+	settings := GetCompleteSettings(SETTINGSFILENAME)
+	tgkDir := settings.Defaults.Tgkdir
+	tgkFolder := settings.Defaults.Tgkfolder
+	dirs := GetDirsInDir(tgkDir)
+	dirsWithOutTgkFolder := Remove(dirs, tgkFolder)
+	p := tea.NewProgram(initialModel(dirsWithOutTgkFolder))
 	if _, err := p.Run(); err != nil {
 		fmt.Printf("Something went wrong: %s", err)
 		os.Exit(1)
