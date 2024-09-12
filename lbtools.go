@@ -1,11 +1,14 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"path/filepath"
 	"reflect"
 	"strings"
+
+	"github.com/shirou/gopsutil/v3/process"
 )
 
 func Typeof(v interface{}) string {
@@ -104,4 +107,21 @@ func Remove[T comparable](l []T, item T) []T {
 		}
 	}
 	return l
+}
+
+func KillProcess(name string) error {
+	processes, err := process.Processes()
+	if err != nil {
+		return err
+	}
+	for _, p := range processes {
+		n, err := p.Name()
+		if err != nil {
+			return err
+		}
+		if n == name {
+			return p.Kill()
+		}
+	}
+	return fmt.Errorf("process not found")
 }
