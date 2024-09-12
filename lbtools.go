@@ -129,7 +129,7 @@ func KillProcessByName(name string) error {
 		}
 	}
 	// return nil and not an error. Process could not be terminated because it never existed.
-	fmt.Printf("\nProcess %s could not be terminated because it was not found.\n", name)
+	// fmt.Printf("\nProcess %s could not be terminated because it was not found.\n", name)
 	return nil
 }
 

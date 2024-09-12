@@ -9,13 +9,28 @@ import (
 	"github.com/shirou/gopsutil/v4/process"
 )
 
-//func Test_RestartProgramByName(t *testing.T) {
-//	programName := "excel"
-//	err := RestartProgramByName(programName)
-//	if err != nil {
-//		t.Fatalf("Could not stop and start %s due to: %s", programName, err)
-//	}
-//}
+// kills excel (if running) and then restarts it (and then kills it again so the test leaves no trace)
+func Test_RestartProgramByName(t *testing.T) {
+	programName := "excel"
+	errChan := make(chan error, 1)
+	var wg sync.WaitGroup
+	wg.Add(1)
+	go func(wg *sync.WaitGroup) {
+		defer wg.Done()
+		err := RestartProgramByName(programName)
+		errChan <- err
+	}(&wg)
+	wg.Wait()
+	close(errChan)
+	if err, ok := <-errChan; ok && err != nil {
+		t.Fatalf("Could not stop and start %s due to: %s", programName, err)
+	}
+	processName := strings.ToUpper(programName) + ".EXE"
+	err := KillProcessByName(processName)
+	if err != nil {
+		t.Fatalf("Could not kill %s, error: \n%s", processName, err)
+	}
+}
 
 // starts kills an excel process if all works well
 func Test_KillProcessByName(t *testing.T) {
