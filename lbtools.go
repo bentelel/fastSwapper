@@ -147,10 +147,12 @@ func StartProgramByName(name string) error {
 func RestartProgramByName(name string) error {
 	var err error
 	var wg sync.WaitGroup
-	errChan := make(chan error)
+	errChan := make(chan error, 1)
 	processName := strings.ToUpper(name) + ".EXE"
 	// call the subroutines in line so they still can be used on their own without concurrency
+	wg.Add(1)
 	go func(wg *sync.WaitGroup) {
+		defer wg.Done()
 		err = KillProcessByName(processName)
 		errChan <- err
 	}(&wg)
@@ -161,11 +163,14 @@ func RestartProgramByName(name string) error {
 	if err, ok := <-errChan; ok && err != nil {
 		return err
 	}
-	errChan2 := make(chan error)
+	errChan2 := make(chan error, 1)
+	wg.Add(1)
 	go func(wg *sync.WaitGroup) {
+		defer wg.Done()
 		err = StartProgramByName(name)
 		errChan2 <- err
 	}(&wg)
+	wg.Wait()
 	close(errChan2)
 	if err, ok := <-errChan2; ok && err != nil {
 		return err
