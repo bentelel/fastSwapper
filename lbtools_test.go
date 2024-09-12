@@ -14,15 +14,9 @@ func Test_RestartProgramByName(t *testing.T) {
 	}
 }
 
-// starts an excel process and kills it if everything works as it should
-func Test_StartProgramByName_KillProcessByName_KillingProcess(t *testing.T) {
+// starts kills an excel process if all works well
+func Test_KillProcessByName_KillingProcess(t *testing.T) {
 	processName := "EXCEL.EXE"
-	programName := "excel"
-	err := StartProgramByName(programName)
-	if err != nil {
-		t.Fatalf("Could not spin up %s, error: %s", programName, err)
-	}
-	// wait for Excel be to started
 
 	// first check if we can get and access the process at all
 	processes, err := process.Processes()

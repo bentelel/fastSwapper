@@ -129,7 +129,7 @@ func KillProcessByName(name string) error {
 		}
 	}
 	// return nil and not an error. Process could not be terminated because it never existed.
-	fmt.Printf("Process %s could not be terminated because it was not found.", name)
+	fmt.Printf("\nProcess %s could not be terminated because it was not found.\n", name)
 	return nil
 }
 
@@ -157,17 +157,18 @@ func RestartProgramByName(name string) error {
 	// wait for process kill to finish
 	wg.Wait()
 	// Close error channel
-	// close(errChan)
+	close(errChan)
 	if err, ok := <-errChan; ok && err != nil {
 		return err
 	}
+	errChan2 := make(chan error)
 	go func(wg *sync.WaitGroup) {
 		err = StartProgramByName(name)
-		errChan <- err
+		errChan2 <- err
 	}(&wg)
-	if err, ok := <-errChan; ok && err != nil {
+	close(errChan2)
+	if err, ok := <-errChan2; ok && err != nil {
 		return err
 	}
-	close(errChan)
 	return err
 }
