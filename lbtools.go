@@ -116,8 +116,11 @@ func KillProcess(name string) error {
 	}
 	for _, p := range processes {
 		n, err := p.Name()
+		// Some processes do not let me access their names p.e. "Secure System". for those we need to skip ahead.
+		// for now we dont handle err and just skip ahead
 		if err != nil {
-			return err
+			// t.Fatalf("Error fetching process name while looking for %s: %s", processName, err)
+			continue
 		}
 		if n == name {
 			return p.Kill()

@@ -66,6 +66,10 @@ func (m model) swapFolders() error {
 	return nil
 }
 
+func killExcel(name string) error {
+	return KillProcess(name)
+}
+
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	// Is it a key press?
@@ -77,6 +81,10 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		// These keys should exit the program.
 		case "ctrl+c", "q":
 			return m, tea.Quit
+
+		case "w":
+			killExcel("EXCEL.EXE")
+			return m, nil
 
 		case "u":
 			// if any entry is selected, make the swapping.

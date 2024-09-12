@@ -40,6 +40,18 @@ func HelpInformation() helpInformation {
 	return help
 }
 
+const (
+	SETTINGS_FILE_NAME       string = "settings.json"
+	TGK_DIR_DEFAULT_WIN             = "C:\\Tagetik\\Tagetik Excel .NET Client"
+	HELP_FLAG                       = "-h"
+	SWAP_FLAG                       = "-sw"
+	SET_DEFAULT_PATH_FLAG           = "-d"
+	SET_DEFAULT_WINPATH_FLAG        = "-dw"
+	SET_TGK_FOLDER_FLAG             = "-tf"
+	SET_OLDDIR_NAME_FLAG            = "-o"
+	EXCEL_PROCESS_NAME              = "EXCEL.EXE"
+)
+
 func RunSwapper(args []string) error {
 	// try parsing the cli args which have been forwarded from the entry point. We omit arg 0 because thats only the path of the program.
 	err := parseCLIargs(args[1:])
@@ -54,16 +66,7 @@ func parseCLIargs(args []string) error {
 		err             error
 		FORBIDDEN_CHARS [9]string = [9]string{"\\", "/", ":", "*", "?", "\"", "<", ">", "|"}
 	)
-	const (
-		SETTINGS_FILE_NAME       string = "settings.json"
-		TGK_DIR_DEFAULT_WIN             = "C:\\Tagetik\\Tagetik Excel .NET Client"
-		HELP_FLAG                       = "-h"
-		SWAP_FLAG                       = "-sw"
-		SET_DEFAULT_PATH_FLAG           = "-d"
-		SET_DEFAULT_WINPATH_FLAG        = "-dw"
-		SET_TGK_FOLDER_FLAG             = "-tf"
-		SET_OLDDIR_NAME_FLAG            = "-o"
-	)
+
 	help := HelpInformation()
 	// concatenate all args after 1 (including 1) into 1
 	if len(args) > 1 {
@@ -226,7 +229,6 @@ func swapDirectories(set Settings, newDirName string, settingsFileName string) e
 	tgkDir := set.Defaults.Tgkdir
 	tgkfolder := set.Defaults.Tgkfolder
 	// add logic here that does the following:
-	// check: does newdir exist?
 	newDirPath := tgkDir + "\\" + newDirName
 	if !IsDir(newDirPath) {
 		err = errors.New("Folder to swap in does not exist.")
@@ -246,5 +248,9 @@ func swapDirectories(set Settings, newDirName string, settingsFileName string) e
 	}
 	// 3. update oldDir setting with newDir
 	setActiveSettings(settingsFileName, "OldDirectory", newDirName)
+	// Terminate MS Excel
+	err = KillProcess(EXCEL_PROCESS_NAME)
+
+	// Penultimate return
 	return err
 }
