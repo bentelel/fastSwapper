@@ -35,7 +35,7 @@ func ContainsStringWord(sliceToCheckAgainst []string, wordToCheck string) bool {
 	return false
 }
 
-func IsDir(path string) bool {
+func Exists(path string) bool {
 	if _, err := os.Stat(path); os.IsNotExist(err) {
 		return false
 	}

@@ -41,18 +41,34 @@ func HelpInformation() helpInformation {
 }
 
 const (
-	SETTINGS_FILE_NAME       string = "settings.json"
-	TGK_DIR_DEFAULT_WIN             = "C:\\Tagetik\\Tagetik Excel .NET Client"
-	HELP_FLAG                       = "-h"
-	SWAP_FLAG                       = "-sw"
-	SET_DEFAULT_PATH_FLAG           = "-d"
-	SET_DEFAULT_WINPATH_FLAG        = "-dw"
-	SET_TGK_FOLDER_FLAG             = "-tf"
-	SET_OLDDIR_NAME_FLAG            = "-o"
-	EXCEL_PROCESS_NAME              = "EXCEL.EXE"
+	SETTINGS_FILE_NAME         string = "settings.json"
+	TGK_FOLDER_DEFAULT_WIN            = "Tagetik Excel .NET Client"
+	TGK_PARENT_DIR_DEFAULT_WIN        = "C:\\Tagetik\\"
+	TGK_DIR_DEFAULT_WIN               = TGK_PARENT_DIR_DEFAULT_WIN + TGK_FOLDER_DEFAULT_WIN
+	HELP_FLAG                         = "-h"
+	SWAP_FLAG                         = "-sw"
+	SET_DEFAULT_PATH_FLAG             = "-d"
+	SET_DEFAULT_WINPATH_FLAG          = "-dw"
+	SET_TGK_FOLDER_FLAG               = "-tf"
+	SET_OLDDIR_NAME_FLAG              = "-o"
+	EXCEL_PROCESS_NAME                = "EXCEL.EXE"
 )
 
 func RunSwapper(args []string) error {
+	// if settings.json does not exist, create it and put default values into it.
+	candidatePath := TGK_PARENT_DIR_DEFAULT_WIN + SETTINGSFILENAME
+	if !Exists(candidatePath) {
+		initial_default_settings := Settings{
+			Defaults: Default{
+				Tgkdir:    TGK_DIR_DEFAULT_WIN,
+				Tgkfolder: TGK_FOLDER_DEFAULT_WIN,
+			},
+			ActiveSettings: ActiveSettings{
+				OldDirectory: "default_client_please_rename",
+			},
+		}
+		updateSettingsJson(candidatePath, initial_default_settings)
+	}
 	// try parsing the cli args which have been forwarded from the entry point. We omit arg 0 because thats only the path of the program.
 	err := parseCLIargs(args[1:])
 	if err != nil {
@@ -116,7 +132,7 @@ func parseCLIargs(args []string) error {
 			return err
 		}
 		candidatePath := args[1]
-		if !IsDir(candidatePath) {
+		if !Exists(candidatePath) {
 			err = errors.New("Supplied path does not exist.")
 			return err
 		}
@@ -230,7 +246,7 @@ func swapDirectories(set Settings, newDirName string, settingsFileName string) e
 	tgkfolder := set.Defaults.Tgkfolder
 	// add logic here that does the following:
 	newDirPath := tgkDir + "\\" + newDirName
-	if !IsDir(newDirPath) {
+	if !Exists(newDirPath) {
 		err = errors.New("Folder to swap in does not exist.")
 		return err
 	}
