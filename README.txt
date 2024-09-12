@@ -17,4 +17,5 @@ What does it do?
 
 To Do:
   Test with real data.
+  check: is settings.json automatically generated if it does not exist?
   Add "new entry"-mode > enter new name (system then should copy and not move the current main folder so that the user can go to excel and set up the new connection etc.)
