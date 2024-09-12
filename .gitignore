@@ -1,2 +1,15 @@
-fastSwapper.exe
 testFolder
+# Compiled files
+*.class
+*.exe
+*.out
+*.o
+*.a
+
+# Log files
+*.log
+
+# Go build output
+*.exe
+*.test
+*.out
