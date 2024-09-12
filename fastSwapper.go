@@ -71,7 +71,7 @@ func InitSettingsJSON() {
 		initial_default_settings := Settings{
 			Defaults: Default{
 				Tgkdir:    TGK_DIR_DEFAULT_WIN,
-				Tgkfolder: TGK_FOLDER_DEFAULT_WIN,
+				Tgkfolder: TGK_PARENT_DIR_DEFAULT_WIN,
 			},
 			ActiveSettings: ActiveSettings{
 				OldDirectory: "default_client_please_rename",
