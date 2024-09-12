@@ -56,6 +56,16 @@ const (
 
 func RunSwapper(args []string) error {
 	// if settings.json does not exist, create it and put default values into it.
+	InitSettingsJSON()
+	// try parsing the cli args which have been forwarded from the entry point. We omit arg 0 because thats only the path of the program.
+	err := parseCLIargs(args[1:])
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func InitSettingsJSON() {
 	candidatePath := TGK_PARENT_DIR_DEFAULT_WIN + SETTINGSFILENAME
 	if !Exists(candidatePath) {
 		initial_default_settings := Settings{
@@ -69,12 +79,6 @@ func RunSwapper(args []string) error {
 		}
 		updateSettingsJson(candidatePath, initial_default_settings)
 	}
-	// try parsing the cli args which have been forwarded from the entry point. We omit arg 0 because thats only the path of the program.
-	err := parseCLIargs(args[1:])
-	if err != nil {
-		return err
-	}
-	return nil
 }
 
 func parseCLIargs(args []string) error {

@@ -159,6 +159,9 @@ func (m model) View() string {
 }
 
 func runTui() {
+	// at runtime, create default settings JSON if it doesnt exists.
+	InitSettingsJSON()
+
 	settings := GetCompleteSettings(SETTINGSFILENAME)
 	tgkDir := settings.Defaults.Tgkdir
 	tgkFolder := settings.Defaults.Tgkfolder
