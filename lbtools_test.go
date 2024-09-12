@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"strings"
 	"sync"
 	"testing"
@@ -9,14 +8,21 @@ import (
 	"github.com/shirou/gopsutil/v4/process"
 )
 
+func Test_main(t *testing.T) {
+	// run test functions as subtests so they run sequencially. We do this because both tests test against the Excel-process and might run into raceconditions if run without waiting each other out.
+	t.Run("Restart Test", func(t *testing.T) { TRestartProgramByName(t) })
+	t.Run("Kill Test", func(t *testing.T) { TKillProcessByName(t) })
+}
+
 // kills excel (if running) and then restarts it (and then kills it again so the test leaves no trace)
-func Test_RestartProgramByName(t *testing.T) {
+func TRestartProgramByName(t *testing.T) {
 	programName := "excel"
 	errChan := make(chan error, 1)
 	var wg sync.WaitGroup
 	wg.Add(1)
 	go func(wg *sync.WaitGroup) {
 		defer wg.Done()
+		t.Logf("Restarting %s.\n", programName)
 		err := RestartProgramByName(programName)
 		errChan <- err
 	}(&wg)
@@ -26,6 +32,7 @@ func Test_RestartProgramByName(t *testing.T) {
 		t.Fatalf("Could not stop and start %s due to: %s", programName, err)
 	}
 	processName := strings.ToUpper(programName) + ".EXE"
+	t.Logf("Killing %s agian.\n", programName)
 	err := KillProcessByName(processName)
 	if err != nil {
 		t.Fatalf("Could not kill %s, error: \n%s", processName, err)
@@ -33,7 +40,7 @@ func Test_RestartProgramByName(t *testing.T) {
 }
 
 // starts kills an excel process if all works well
-func Test_KillProcessByName(t *testing.T) {
+func TKillProcessByName(t *testing.T) {
 	programName := "excel"
 	processName := strings.ToUpper(programName) + ".EXE"
 	var err error
@@ -43,7 +50,7 @@ func Test_KillProcessByName(t *testing.T) {
 	wg.Add(1)
 	go func(wg *sync.WaitGroup) {
 		defer wg.Done()
-		fmt.Printf("Starting %s\n", programName)
+		t.Logf("Starting %s\n", programName)
 		err = StartProgramByName(programName)
 		errChan <- err
 	}(&wg)
@@ -77,7 +84,7 @@ func Test_KillProcessByName(t *testing.T) {
 	wg.Add(1)
 	go func(wg *sync.WaitGroup) {
 		defer wg.Done()
-		fmt.Printf("Killing %s\n", programName)
+		t.Logf("Killing %s\n", programName)
 		err = KillProcessByName(processName)
 		errChan2 <- err
 	}(&wg)
