@@ -67,7 +67,7 @@ func (m model) swapFolders() error {
 }
 
 func killExcel(name string) error {
-	return KillProcess(name)
+	return KillProcessByName(name)
 }
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {

@@ -249,7 +249,7 @@ func swapDirectories(set Settings, newDirName string, settingsFileName string) e
 	// 3. update oldDir setting with newDir
 	setActiveSettings(settingsFileName, "OldDirectory", newDirName)
 	// Terminate MS Excel
-	err = KillProcess(EXCEL_PROCESS_NAME)
+	err = KillProcessByName(EXCEL_PROCESS_NAME)
 
 	// Penultimate return
 	return err

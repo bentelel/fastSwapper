@@ -6,8 +6,24 @@ import (
 	"github.com/shirou/gopsutil/v4/process"
 )
 
-func Test_KillProcess_KillingProcess(t *testing.T) {
+func Test_RestartProgramByName(t *testing.T) {
+	programName := "excel"
+	err := RestartProgramByName(programName)
+	if err != nil {
+		t.Fatalf("Could not stop and start %s due to: %s", programName, err)
+	}
+}
+
+// starts an excel process and kills it if everything works as it should
+func Test_StartProgramByName_KillProcessByName_KillingProcess(t *testing.T) {
 	processName := "EXCEL.EXE"
+	programName := "excel"
+	err := StartProgramByName(programName)
+	if err != nil {
+		t.Fatalf("Could not spin up %s, error: %s", programName, err)
+	}
+	// wait for Excel be to started
+
 	// first check if we can get and access the process at all
 	processes, err := process.Processes()
 	if err != nil {
@@ -28,7 +44,7 @@ func Test_KillProcess_KillingProcess(t *testing.T) {
 		t.Fatalf("%s not found in running processes, cannot commence test.", processName)
 	}
 
-	err = KillProcess(processName)
+	err = KillProcessByName(processName)
 	if err != nil {
 		t.Fatalf("Could not kill process %s, error: %s", processName, err)
 	}

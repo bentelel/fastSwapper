@@ -4,9 +4,11 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"reflect"
 	"strings"
+	"sync"
 
 	"github.com/shirou/gopsutil/v3/process"
 )
@@ -109,7 +111,7 @@ func Remove[T comparable](l []T, item T) []T {
 	return l
 }
 
-func KillProcess(name string) error {
+func KillProcessByName(name string) error {
 	processes, err := process.Processes()
 	if err != nil {
 		return err
@@ -126,5 +128,46 @@ func KillProcess(name string) error {
 			return p.Kill()
 		}
 	}
-	return fmt.Errorf("process not found")
+	// return nil and not an error. Process could not be terminated because it never existed.
+	fmt.Printf("Process %s could not be terminated because it was not found.", name)
+	return nil
+}
+
+func StartProgramByName(name string) error {
+	// add string sanitization to name so no arbitrary code can be pushed through
+	cmd := exec.Command("cmd", "/C", "start", name)
+	err := cmd.Run()
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// calls a stop and start func as waitgroups to ensure that the program properly closes before restarting.
+func RestartProgramByName(name string) error {
+	var err error
+	var wg sync.WaitGroup
+	errChan := make(chan error)
+	processName := strings.ToUpper(name) + ".EXE"
+	// call the subroutines in line so they still can be used on their own without concurrency
+	go func(wg *sync.WaitGroup) {
+		err = KillProcessByName(processName)
+		errChan <- err
+	}(&wg)
+	// wait for process kill to finish
+	wg.Wait()
+	// Close error channel
+	// close(errChan)
+	if err, ok := <-errChan; ok && err != nil {
+		return err
+	}
+	go func(wg *sync.WaitGroup) {
+		err = StartProgramByName(name)
+		errChan <- err
+	}(&wg)
+	if err, ok := <-errChan; ok && err != nil {
+		return err
+	}
+	close(errChan)
+	return err
 }
