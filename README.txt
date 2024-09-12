@@ -16,6 +16,7 @@ What does it do?
 
 
 To Do:
-  Test with real data.
-  check: is settings.json automatically generated if it does not exist?
-  Add "new entry"-mode > enter new name (system then should copy and not move the current main folder so that the user can go to excel and set up the new connection etc.)
+  -make it so that the swapper can run from anywhere and not only from within the tgk folder (probably a problem with finding settings.json?)
+  -add some more info to it >"if you update excel will be closed without further warning" etc
+  -make it fancy
+  -Add "new entry"-mode > enter new name (system then should copy and not move the current main folder so that the user can go to excel and set up the new connection etc.)
