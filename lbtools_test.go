@@ -70,6 +70,25 @@ func Test_Exists(t *testing.T) {
 	}
 }
 
+// func Test_GetDirsInDir() > how to test, for this we would need to create a dir and some dirs underneath and then test that and afterwards delete that again..
+// same for Test_GetAllInDir()..
+
+func Test_All(t *testing.T) {
+	fun := func(n int) bool { return n >= 0 }
+	nums := []int{-1, -1, 0, 1}
+	want := false
+	got := All(nums, fun)
+	if want != got {
+		t.Fatalf("Check failed, expected %s, got %s.\n", strconv.FormatBool(want), strconv.FormatBool(got))
+	}
+	nums = []int{1, 1, 0, 1}
+	want = true
+	got = All(nums, fun)
+	if want != got {
+		t.Fatalf("Check failed, expected %s, got %s.\n", strconv.FormatBool(want), strconv.FormatBool(got))
+	}
+}
+
 func Test_main(t *testing.T) {
 	// run test functions as subtests so they run sequencially. We do this because both tests test against the Excel-process and might run into raceconditions if run without waiting each other out.
 	t.Run("Restart Test", func(t *testing.T) { TRestartProgramByName(t) })
