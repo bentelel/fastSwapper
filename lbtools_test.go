@@ -1,12 +1,64 @@
 package main
 
 import (
+	"strconv"
 	"strings"
 	"sync"
 	"testing"
 
 	"github.com/shirou/gopsutil/v4/process"
 )
+
+func Test_Typeof(t *testing.T) {
+	anInt := 1
+	aString := "test"
+	aSlice := []int{1, 2, 3}
+	aSliceAsText := "[]int{1, 2, 3}"
+	wantIntType := "int"
+	wantStringType := "string"
+	wantSliceType := "[]int"
+	if got := Typeof(anInt); got != wantIntType {
+		t.Fatalf("Type to string conversion failed for %s. \nExpected: %s\n Got: %s\n", strconv.Itoa(anInt), wantIntType, got)
+	}
+	if got := Typeof(aString); got != wantStringType {
+		t.Fatalf("Type to string conversion failed for %s. \nExpected: %s\n Got: %s\n", aString, wantStringType, got)
+	}
+	if got := Typeof(aSlice); got != wantSliceType {
+		t.Fatalf("Type to string conversion failed for %s. \nExpected: %s\n Got: %s\n", aSliceAsText, wantSliceType, got)
+	}
+}
+
+func Test_ContainsStringWord(t *testing.T) {
+	slice := []string{"A", "B", "C"}
+	word := "TestWordA"
+	want := true
+	got := ContainsStringWord(slice, word)
+	if want != got {
+		t.Fatalf("Positive test failed,\nExpected: %s\nGot: %s", strconv.FormatBool(want), strconv.FormatBool(got))
+	}
+	word = "TestWord"
+	want = false
+	got = ContainsStringWord(slice, word)
+	if want != got {
+		t.Fatalf("Negative test failed,\nExpected: %s\nGot: %s", strconv.FormatBool(want), strconv.FormatBool(got))
+	}
+}
+
+func Test_ContainsString(t *testing.T) {
+	haystack := []string{"A", "B", "C"}
+	needle := "C"
+	want := true
+	got := ContainsString(haystack, needle)
+	if want != got {
+		t.Fatalf("Positive test failed,\nExpected: %s\nGot: %s", strconv.FormatBool(want), strconv.FormatBool(got))
+	}
+	needle = "D"
+	want = false
+	got = ContainsString(haystack, needle)
+	if want != got {
+		t.Fatalf("Negative test failed,\nExpected: %s\nGot: %s", strconv.FormatBool(want), strconv.FormatBool(got))
+	}
+}
 
 func Test_main(t *testing.T) {
 	// run test functions as subtests so they run sequencially. We do this because both tests test against the Excel-process and might run into raceconditions if run without waiting each other out.
