@@ -16,6 +16,7 @@ func Typeof(v interface{}) string {
 	return reflect.TypeOf(v).String()
 }
 
+// tests if a string contains a specific character
 func ContainsString(s []string, e string) bool {
 	for _, a := range s {
 		if a == e {
@@ -25,6 +26,7 @@ func ContainsString(s []string, e string) bool {
 	return false
 }
 
+// tests if a slice of strings contains a specific word
 func ContainsStringWord(sliceToCheckAgainst []string, wordToCheck string) bool {
 	// this is probably highly inefficient, as we are looping over the complete list for each rune in wordToCheck, but whatever, well refactor later
 	for _, r := range wordToCheck {
