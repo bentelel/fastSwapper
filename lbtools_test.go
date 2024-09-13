@@ -60,6 +60,16 @@ func Test_ContainsString(t *testing.T) {
 	}
 }
 
+func Test_Exists(t *testing.T) {
+	// ideally we would create a test dir/file here and test against that and then delete it.
+	// however i couldnt make that work, so for now we test against the Tagetik folder.
+	want := true
+	path := "C:\\Tagetik\\"
+	if got := Exists(path); want != got {
+		t.Fatalf("Could not find file %s even though it exists. Expected Exists() to return %s but got %s.\n", path, strconv.FormatBool(want), strconv.FormatBool(got))
+	}
+}
+
 func Test_main(t *testing.T) {
 	// run test functions as subtests so they run sequencially. We do this because both tests test against the Excel-process and might run into raceconditions if run without waiting each other out.
 	t.Run("Restart Test", func(t *testing.T) { TRestartProgramByName(t) })
