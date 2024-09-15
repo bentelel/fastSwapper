@@ -1,6 +1,7 @@
 package main
 
 import (
+	"slices"
 	"strconv"
 	"strings"
 	"sync"
@@ -8,6 +9,20 @@ import (
 
 	"github.com/shirou/gopsutil/v4/process"
 )
+
+func Test_Map(t *testing.T) {
+	// test some cases
+	want := 2
+	f := func(n int) int { return n * 2 }
+	got := Map([]int{1}, f)
+	if want != got[0] {
+		t.Fatalf("Wanted: %s\n"+
+			"Got: %s\n", strconv.Itoa(want), strconv.Itoa(got[0]))
+	}
+
+	// what happens if we pass in an empty slice?
+	_ = Map([]int{}, f)
+}
 
 func Test_Typeof(t *testing.T) {
 	anInt := 1
@@ -86,6 +101,38 @@ func Test_All(t *testing.T) {
 	got = All(nums, fun)
 	if want != got {
 		t.Fatalf("Check failed, expected %s, got %s.\n", strconv.FormatBool(want), strconv.FormatBool(got))
+	}
+}
+
+func Test_CombineString(t *testing.T) {
+	stringsToCombine := []string{"A", "B"}
+	want := "A B"
+	got, err := CombineString(stringsToCombine)
+	if err != nil || got != want {
+		t.Fatalf("String combining failed.\nWant: %s\n Got: %s\nerror: %s\n", want, got, err)
+	}
+}
+
+func Test_Remove(t *testing.T) {
+	// string slice
+	s := []string{"A", "B", "C", "A"}
+	toRemove := "A"
+	want := []string{"B", "C", "A"}
+	got := Remove(s, toRemove)
+	if !slices.Equal(want, got) {
+		t.Fatalf("Wanted: %s\n"+
+			"Got: %s\n",
+			want, got)
+	}
+	// int slice
+	s2 := []int{1, 2, 1, 2, 3}
+	toRemove2 := 2
+	want2 := []int{1, 1, 2, 3}
+	got2 := Remove(s2, toRemove2)
+	if !slices.Equal(want2, got2) {
+		t.Fatalf("Wanted: %s\n"+
+			"Got: %s\n",
+			Map(want2, strconv.Itoa), Map(got2, strconv.Itoa))
 	}
 }
 

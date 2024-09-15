@@ -12,11 +12,20 @@ import (
 	"github.com/shirou/gopsutil/v3/process"
 )
 
+// Map applies a function to each element of the input slice and returns a new slice of results.
+func Map[T any, U any](input []T, f func(T) U) []U {
+	result := make([]U, len(input)) // Create a slice to hold the results
+	for i, v := range input {
+		result[i] = f(v) // Apply the function and store the result
+	}
+	return result
+}
+
 func Typeof(v interface{}) string {
 	return reflect.TypeOf(v).String()
 }
 
-// tests if a string contains a specific character
+// tests if a the string e is part of the slice s.
 func ContainsString(s []string, e string) bool {
 	for _, a := range s {
 		if a == e {
@@ -26,11 +35,11 @@ func ContainsString(s []string, e string) bool {
 	return false
 }
 
-// tests if a slice of strings contains a specific word
-func ContainsStringWord(sliceToCheckAgainst []string, wordToCheck string) bool {
+// tests if any of the substrings/characters in the slice if part of the word to check
+func ContainsStringWord(charactersToCheckFor []string, wordToCheck string) bool {
 	// this is probably highly inefficient, as we are looping over the complete list for each rune in wordToCheck, but whatever, well refactor later
 	for _, r := range wordToCheck {
-		if ContainsString(sliceToCheckAgainst, string(r)) {
+		if ContainsString(charactersToCheckFor, string(r)) {
 			return true
 		}
 	}
@@ -86,6 +95,8 @@ func All[T any](ts []T, pred func(T) bool) bool {
 	return true
 }
 
+// Combines a slice of strings into a single string separated by a space
+// trimsuffix is used to remove the trailing space we introduce
 func CombineString(s []string) (string, error) {
 	var err error
 	var ret string
@@ -96,6 +107,7 @@ func CombineString(s []string) (string, error) {
 	return ret, err
 }
 
+// removes a suffix from a string
 func TrimSuffix(s, suffix string) string {
 	if strings.HasSuffix(s, suffix) {
 		s = s[:len(s)-len(suffix)]
@@ -103,6 +115,7 @@ func TrimSuffix(s, suffix string) string {
 	return s
 }
 
+// Remove first occurance of given item from slice; generic in slice type
 func Remove[T comparable](l []T, item T) []T {
 	for i, other := range l {
 		if other == item {
