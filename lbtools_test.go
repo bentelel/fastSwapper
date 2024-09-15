@@ -21,6 +21,7 @@ func Test_Map(t *testing.T) {
 	}
 
 	// what happens if we pass in an empty slice?
+	t.Log("Passing and empty slice to Map")
 	_ = Map([]int{}, f)
 }
 
@@ -133,6 +134,27 @@ func Test_Remove(t *testing.T) {
 		t.Fatalf("Wanted: %s\n"+
 			"Got: %s\n",
 			Map(want2, strconv.Itoa), Map(got2, strconv.Itoa))
+	}
+
+	// elem not in slice
+	s = []string{"A", "B"}
+	toRemove = "Z"
+	want = []string{"A", "B"}
+	got = Remove(s, toRemove)
+	if !slices.Equal(want, got) {
+		t.Fatalf("Wanted: %s\n"+
+			"Got: %s\n",
+			want, got)
+	}
+
+	// empty slice?
+	s = []string{}
+	want = []string{}
+	got = Remove(s, toRemove)
+	if !slices.Equal(want, got) {
+		t.Fatalf("Wanted: %s\n"+
+			"Got: %s\n",
+			want, got)
 	}
 }
 
