@@ -5,11 +5,19 @@ import (
 	"os"
 
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/lipgloss"
 )
 
 const (
 	SETTINGSFILENAME string = "settings.json"
 	SWAPFLAG                = "-sw"
+)
+
+// keywordStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("204")).Background(lipgloss.Color("235"))
+var (
+	keywordStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("170"))
+	cursorStyle  = lipgloss.NewStyle().Foreground(lipgloss.Color("204"))
+	helpStyle    = lipgloss.NewStyle().Foreground(lipgloss.Color("241")).Inline(true)
 )
 
 // model holds the state
@@ -84,7 +92,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		case "u":
 			// diplay pop window to check if user really wants to proceed, if not then restart mainModel
-
+			// TO DO: add the logic so this does not directly kill excel but informs the user first.
 			// if any entry is selected, make the swapping.
 			if len(m.selected) > 0 {
 				m.swapFolders()
@@ -128,21 +136,21 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 func (m model) View() string {
 	// The header
-	s := "Please chose which version to swap in.\n"
-	s += "Currently active: " + m.active + "\n\n"
+	s := helpStyle.Render("Please chose which version to swap in.") + "\n"
+	s += helpStyle.Render("Currently active: ") + keywordStyle.Render(m.active) + "\n\n"
 	// Iterate over our choices
 	for i, choice := range m.choices {
 
 		// Is the cursor pointing at this choice?
 		cursor := " " // no cursor
 		if m.cursor == i {
-			cursor = ">" // cursor!
+			cursor = cursorStyle.Render(">") // cursor!
 		}
 
 		// Is this choice selected?
 		checked := " " // not selected
 		if _, ok := m.selected[i]; ok {
-			checked = "x" // selected!
+			checked = cursorStyle.Render("x") // selected!
 		}
 
 		// Render the row
@@ -150,7 +158,7 @@ func (m model) View() string {
 	}
 
 	// The footer
-	s += "\nPress q to quit.\t Press u to update.\n"
+	s += "\n" + helpStyle.Render("Press q to quit.\t Press u to update.") + "\n"
 
 	// Send the UI for rendering
 	return s
