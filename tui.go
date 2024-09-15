@@ -22,7 +22,7 @@ type model struct {
 }
 
 // initialization of a new model
-func initialModel(dirs []string, activeVersion string) model {
+func mainModel(dirs []string, activeVersion string) model {
 	return model{
 		// choices:  []string{"Buy carrots", "Buy celery", "Do somthing else"},
 		choices:      dirs,
@@ -82,11 +82,9 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "ctrl+c", "q":
 			return m, tea.Quit
 
-		case "w":
-			killExcel("EXCEL.EXE")
-			return m, nil
-
 		case "u":
+			// diplay pop window to check if user really wants to proceed, if not then restart mainModel
+
 			// if any entry is selected, make the swapping.
 			if len(m.selected) > 0 {
 				m.swapFolders()
@@ -168,7 +166,7 @@ func runTui() {
 	dirs := GetDirsInDir(tgkDir)
 	dirsWithOutTgkFolder := Remove(dirs, tgkFolder)
 	activeVersion := settings.ActiveSettings.OldDirectory
-	p := tea.NewProgram(initialModel(dirsWithOutTgkFolder, activeVersion))
+	p := tea.NewProgram(mainModel(dirsWithOutTgkFolder, activeVersion))
 	if _, err := p.Run(); err != nil {
 		fmt.Printf("Something went wrong: %s", err)
 		os.Exit(1)

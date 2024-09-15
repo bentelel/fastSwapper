@@ -13,5 +13,3 @@ testFolder
 *.exe
 *.test
 *.out
-
-./bin
