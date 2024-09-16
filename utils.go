@@ -6,6 +6,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"reflect"
+	"regexp"
 	"strings"
 	"sync"
 
@@ -198,4 +199,9 @@ func PadRight(toPad string, padWith rune, width int) string {
 	}
 	padding := strings.Repeat(string(padWith), width-len(toPad))
 	return toPad + padding
+}
+
+func StripANSI(s string) string {
+	ansiRegexp := regexp.MustCompile(`\x1b\[[0-9;]*m`)
+	return ansiRegexp.ReplaceAllString(s, "")
 }

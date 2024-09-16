@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"unicode/utf8"
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
@@ -18,7 +19,7 @@ const (
 var (
 	keywordStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("170"))
 	cursorStyle  = lipgloss.NewStyle().Foreground(lipgloss.Color("204"))
-	helpStyle    = lipgloss.NewStyle().Foreground(lipgloss.Color("241")).Inline(true)
+	helpStyle    = lipgloss.NewStyle().Foreground(lipgloss.Color("241")) //.Inline(true)
 )
 
 // model holds the state
@@ -160,37 +161,54 @@ func (m model) View() string {
 
 	// The footer
 	s += "\n" + helpStyle.Render("Press q to quit.\t Press u to update.") + "\n"
-	s = drawInBox(s)
+	s = drawInBox(s) + "\n"
 	// Send the UI for rendering
 	return s
 }
 
 func drawInBox(s string) string {
+	padRune := ' '
+	topLeftCorner := "\u2554"
+	topRightCorner := "\u2557"
+	topBar := "\u2550"
+	bottomLeftCorner := "\u255A"
+	bottomRightCorner := "\u255D"
+	bottomBar := "\u2550"
+	leftBar := "\u2551"
+	rightBar := "\u2551"
+	numRunesLeftBar := utf8.RuneCountInString(leftBar)
+	numRunesRightBar := utf8.RuneCountInString(rightBar)
 	// num of spaces to add between borders and content; vertical: in rows, horizontal: in spaces
-	// verticalPaddingCount := 1
+	verticalPaddingCount := 0 // vertical padding currently isnt clean as the box characters at the sides are missing!
 	horizontalPaddingCount := 4
-	// verticalPadding := strings.Repeat("\n", verticalPaddingCount)
+	verticalPadding := strings.Repeat("\n", verticalPaddingCount)
 	horizontalPadding := strings.Repeat(" ", horizontalPaddingCount)
 	// split string into slice to find longest row
 	ss := strings.Split(s, "\n")
 	// loop over all rows, add padding and find longest row
 	maxLineLength := 0
-	new_ss := []string{}
 	for _, l := range ss {
-		l = "\u2551" + horizontalPadding + l
-		l = l + horizontalPadding + "\u2551" // add padding here so that the right border is always at the same position. use PadRight()
-		lineLength := len(l)
+		// get hypothetical len to not change the line just now >> needs padding based on max len
+		// len of line string + 2 for box chars + twice the horizontalPadding
+		lineLength := len(l) + len(leftBar) + len(rightBar) + horizontalPaddingCount*2
 		if lineLength > maxLineLength {
 			maxLineLength = lineLength
 		}
-		new_ss = append(new_ss, l)
 	}
-	topLine := "\u2554" + strings.Repeat("\u2550", maxLineLength-2) + "\u2557"
-	bottomLine := "\u255A" + strings.Repeat("\u2550", maxLineLength-2) + "\u255D"
+	// need a second loop in order to apply padding based on maxLineLength!
+	// we strip ANSI escape sequences from the line because those interfere with the padding.
+	padded_ss := []string{}
+	for _, l := range ss {
+		l = leftBar + horizontalPadding + l
+		// the padding does not work cleanly if we swap out leftBar for p.e. "x" instead of "\u2551"
+		l = l + PadRight("", padRune, maxLineLength-len(StripANSI(l))-horizontalPaddingCount+numRunesLeftBar) + horizontalPadding + rightBar
+		padded_ss = append(padded_ss, l)
+	}
+	topLine := topLeftCorner + strings.Repeat(topBar, maxLineLength-numRunesLeftBar-numRunesRightBar) + topRightCorner + "\n"
+	bottomLine := "\n" + bottomLeftCorner + strings.Repeat(bottomBar, maxLineLength-numRunesLeftBar-numRunesRightBar) + bottomRightCorner
 	ret := topLine +
-		"\n" +
-		strings.Join(new_ss[:], "\n") +
-		"\n" +
+		verticalPadding +
+		strings.Join(padded_ss[:], "\n") +
 		bottomLine
 	return ret
 }
