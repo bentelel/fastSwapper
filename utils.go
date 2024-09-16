@@ -191,3 +191,11 @@ func RestartProgramByName(name string) error {
 	}
 	return err
 }
+
+func PadRight(toPad string, padWith rune, width int) string {
+	if len(toPad) > width {
+		return toPad
+	}
+	padding := strings.Repeat(string(padWith), width-len(toPad))
+	return toPad + padding
+}

@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"strings"
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
@@ -159,9 +160,39 @@ func (m model) View() string {
 
 	// The footer
 	s += "\n" + helpStyle.Render("Press q to quit.\t Press u to update.") + "\n"
-
+	s = drawInBox(s)
 	// Send the UI for rendering
 	return s
+}
+
+func drawInBox(s string) string {
+	// num of spaces to add between borders and content; vertical: in rows, horizontal: in spaces
+	// verticalPaddingCount := 1
+	horizontalPaddingCount := 4
+	// verticalPadding := strings.Repeat("\n", verticalPaddingCount)
+	horizontalPadding := strings.Repeat(" ", horizontalPaddingCount)
+	// split string into slice to find longest row
+	ss := strings.Split(s, "\n")
+	// loop over all rows, add padding and find longest row
+	maxLineLength := 0
+	new_ss := []string{}
+	for _, l := range ss {
+		l = "\u2551" + horizontalPadding + l
+		l = l + horizontalPadding + "\u2551" // add padding here so that the right border is always at the same position. use PadRight()
+		lineLength := len(l)
+		if lineLength > maxLineLength {
+			maxLineLength = lineLength
+		}
+		new_ss = append(new_ss, l)
+	}
+	topLine := "\u2554" + strings.Repeat("\u2550", maxLineLength-2) + "\u2557"
+	bottomLine := "\u255A" + strings.Repeat("\u2550", maxLineLength-2) + "\u255D"
+	ret := topLine +
+		"\n" +
+		strings.Join(new_ss[:], "\n") +
+		"\n" +
+		bottomLine
+	return ret
 }
 
 func runTui() {
