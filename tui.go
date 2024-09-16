@@ -17,9 +17,10 @@ const (
 
 // keywordStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("204")).Background(lipgloss.Color("235"))
 var (
-	keywordStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("170"))
-	cursorStyle  = lipgloss.NewStyle().Foreground(lipgloss.Color("204"))
+	keywordStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("#ed832d"))
+	cursorStyle  = lipgloss.NewStyle().Foreground(lipgloss.Color("#ed832d"))
 	helpStyle    = lipgloss.NewStyle().Foreground(lipgloss.Color("241")) //.Inline(true)
+	boxStyle     = lipgloss.NewStyle().Foreground(lipgloss.Color("#ed832d"))
 )
 
 // model holds the state
@@ -160,28 +161,19 @@ func (m model) View() string {
 	}
 
 	// The footer
-	s += "\n" + helpStyle.Render("Press q to quit.\t Press u to update.") + "\n"
-	s = drawInBox(s) + "\n"
+	s += "\n" + helpStyle.Render("Press q to quit.\t Press u to update.")
+	s = drawInBox(s, SingleRounded(boxStyle)) + "\n"
 	// Send the UI for rendering
 	return s
 }
 
-func drawInBox(s string) string {
+func drawInBox(s string, b box) string {
 	padRune := ' '
-	topLeftCorner := "\u2554"
-	topRightCorner := "\u2557"
-	topBar := "\u2550"
-	bottomLeftCorner := "\u255A"
-	bottomRightCorner := "\u255D"
-	bottomBar := "\u2550"
-	leftBar := "\u2551"
-	rightBar := "\u2551"
-	numRunesLeftBar := utf8.RuneCountInString(leftBar)
-	numRunesRightBar := utf8.RuneCountInString(rightBar)
+	numRunesLeftBar := utf8.RuneCountInString(StripANSI(b.leftBar))
+	numRunesRightBar := utf8.RuneCountInString(StripANSI(b.rightBar))
 	// num of spaces to add between borders and content; vertical: in rows, horizontal: in spaces
-	verticalPaddingCount := 0 // vertical padding currently isnt clean as the box characters at the sides are missing!
+	verticalPaddingCount := 1 // vertical padding currently isnt clean as the box characters at the sides are missing!
 	horizontalPaddingCount := 4
-	verticalPadding := strings.Repeat("\n", verticalPaddingCount)
 	horizontalPadding := strings.Repeat(" ", horizontalPaddingCount)
 	// split string into slice to find longest row
 	ss := strings.Split(s, "\n")
@@ -190,7 +182,7 @@ func drawInBox(s string) string {
 	for _, l := range ss {
 		// get hypothetical len to not change the line just now >> needs padding based on max len
 		// len of line string + 2 for box chars + twice the horizontalPadding
-		lineLength := len(l) + len(leftBar) + len(rightBar) + horizontalPaddingCount*2
+		lineLength := len(StripANSI(l)) + numRunesLeftBar + numRunesRightBar + horizontalPaddingCount*2
 		if lineLength > maxLineLength {
 			maxLineLength = lineLength
 		}
@@ -199,16 +191,18 @@ func drawInBox(s string) string {
 	// we strip ANSI escape sequences from the line because those interfere with the padding.
 	padded_ss := []string{}
 	for _, l := range ss {
-		l = leftBar + horizontalPadding + l
+		l = b.leftBar + horizontalPadding + l
 		// the padding does not work cleanly if we swap out leftBar for p.e. "x" instead of "\u2551"
-		l = l + PadRight("", padRune, maxLineLength-len(StripANSI(l))-horizontalPaddingCount+numRunesLeftBar) + horizontalPadding + rightBar
+		l = l + PadRight("", padRune, maxLineLength-len(StripANSI(l))-horizontalPaddingCount+numRunesLeftBar) + horizontalPadding + b.rightBar
 		padded_ss = append(padded_ss, l)
 	}
-	topLine := topLeftCorner + strings.Repeat(topBar, maxLineLength-numRunesLeftBar-numRunesRightBar) + topRightCorner + "\n"
-	bottomLine := "\n" + bottomLeftCorner + strings.Repeat(bottomBar, maxLineLength-numRunesLeftBar-numRunesRightBar) + bottomRightCorner
-	ret := topLine +
+	topLine := b.topLeftCorner + strings.Repeat(b.topBar, maxLineLength-numRunesLeftBar-numRunesRightBar) + b.topRightCorner
+	bottomLine := b.bottomLeftCorner + strings.Repeat(b.bottomBar, maxLineLength-numRunesLeftBar-numRunesRightBar) + b.bottomRightCorner
+	verticalPadding := strings.Repeat(b.leftBar+strings.Repeat(" ", maxLineLength-numRunesLeftBar-numRunesRightBar)+b.rightBar+"\n", verticalPaddingCount)
+	ret := topLine + "\n" +
 		verticalPadding +
-		strings.Join(padded_ss[:], "\n") +
+		strings.Join(padded_ss[:], "\n") + "\n" +
+		verticalPadding +
 		bottomLine
 	return ret
 }
