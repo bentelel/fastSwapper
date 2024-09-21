@@ -25,7 +25,7 @@ var (
 	choiceStyle  = lipgloss.NewStyle().Foreground(lipgloss.Color(choicesColor))
 	keywordStyle = lipgloss.NewStyle().Foreground(lipgloss.Color(mainColor))
 	cursorStyle  = lipgloss.NewStyle().Foreground(lipgloss.Color(mainColor))
-	helpStyle    = lipgloss.NewStyle().Foreground(lipgloss.Color(helpColor)) //.Inline(true)
+	helpStyle    = lipgloss.NewStyle().Foreground(lipgloss.Color(helpColor))
 	boxStyle     = lipgloss.NewStyle().Foreground(lipgloss.Color(mainColor))
 	activeBox    = tuiAssets.GetDefaultBox()
 )
@@ -177,11 +177,21 @@ func (m model) View() string {
 	}
 
 	// The footer
+	// to do: add some way to cleanly align the footers items.
 	s += "\n" + helpStyle.Render("q: quit\tu: swap")
 	s += "\n" + helpStyle.Render("c: change colors\tb: change box")
 	s = drawInBox(s, activeBox) + "\n"
 	// Send the UI for rendering
 	return s
+}
+
+func drawInGrid(items []string, numRows int) string {
+	// split items into n slices, where n is number of rows
+	itemsPerRow := len(items) / numRows
+	itemsInRows := make([][]string, numRows)
+	for idx, item := range items {
+	}
+	return "NOT YET IMPLEMENTED"
 }
 
 func drawInBox(s string, b tuiAssets.Box) string {
