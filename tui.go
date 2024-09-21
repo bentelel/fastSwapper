@@ -19,15 +19,19 @@ const (
 
 // keywordStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("204")).Background(lipgloss.Color("235"))
 var (
-	mainColor    = tuiAssets.GetDefaultColor()
-	helpColor    = tuiAssets.GREY
-	choicesColor = tuiAssets.WHITE
-	choiceStyle  = lipgloss.NewStyle().Foreground(lipgloss.Color(choicesColor))
-	keywordStyle = lipgloss.NewStyle().Foreground(lipgloss.Color(mainColor))
-	cursorStyle  = lipgloss.NewStyle().Foreground(lipgloss.Color(mainColor))
-	helpStyle    = lipgloss.NewStyle().Foreground(lipgloss.Color(helpColor))
-	boxStyle     = lipgloss.NewStyle().Foreground(lipgloss.Color(mainColor))
-	activeBox    = tuiAssets.GetDefaultBox()
+	mainColor     = tuiAssets.GetDefaultColor()
+	footerColor   = tuiAssets.GREY
+	headerColor   = tuiAssets.GREY
+	choicesColor  = tuiAssets.WHITE
+	choiceStyle   = lipgloss.NewStyle().Foreground(lipgloss.Color(choicesColor))
+	keywordStyle  = lipgloss.NewStyle().Foreground(lipgloss.Color(mainColor))
+	cursorStyle   = lipgloss.NewStyle().Foreground(lipgloss.Color(mainColor))
+	footerStyle   = lipgloss.NewStyle().Foreground(lipgloss.Color(footerColor))
+	headerStyle   = lipgloss.NewStyle().Foreground(lipgloss.Color(headerColor))
+	boxStyle      = lipgloss.NewStyle().Foreground(lipgloss.Color(mainColor))
+	activeBox     = tuiAssets.GetDefaultBox()
+	footerItems   = []string{"q: quit", "u: swap", "c: change colors", "b: change box"}
+	numFooterRows = 2
 )
 
 // model holds the state
@@ -152,8 +156,8 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 func (m model) View() string {
 	// The header
-	s := helpStyle.Render("Please chose which version to swap in.") + "\n"
-	s += helpStyle.Render("Currently active: ") + keywordStyle.Render(m.active) + "\n\n"
+	s := headerStyle.Render("Please chose which version to swap in.") + "\n"
+	s += headerStyle.Render("Currently active: ") + keywordStyle.Render(m.active) + "\n\n"
 	// Iterate over our choices
 	for i, choice := range m.choices {
 
@@ -177,21 +181,46 @@ func (m model) View() string {
 	}
 
 	// The footer
-	// to do: add some way to cleanly align the footers items.
-	s += "\n" + helpStyle.Render("q: quit\tu: swap")
-	s += "\n" + helpStyle.Render("c: change colors\tb: change box")
+	s += "\n" + drawInGrid(footerItems, numFooterRows)
 	s = drawInBox(s, activeBox) + "\n"
 	// Send the UI for rendering
 	return s
 }
 
 func drawInGrid(items []string, numRows int) string {
+	padding := " "
 	// split items into n slices, where n is number of rows
-	itemsPerRow := len(items) / numRows
-	itemsInRows := make([][]string, numRows)
-	for idx, item := range items {
+	// use ceiling division to ensure we always have enough room for all items
+	itemsPerRow := (len(items) + numRows - 1) / numRows
+	rows := make([][]string, numRows)
+	for i := range rows {
+		rows[i] = make([]string, itemsPerRow)
 	}
-	return "NOT YET IMPLEMENTED"
+	counter := 0
+	maxLength := 0
+	for idx, item := range items {
+		rows[counter][idx%itemsPerRow] = item
+		if idx%itemsPerRow == itemsPerRow-1 {
+			counter += 1
+		}
+		if len(item) > maxLength {
+			maxLength = len(item)
+		}
+	}
+	s := ""
+	for rowNum, row := range rows {
+		for idx, item := range row {
+			if idx != itemsPerRow-1 {
+				s += item + strings.Repeat(padding, maxLength-len(item)) + strings.Repeat(padding, 2)
+			} else {
+				s += item + strings.Repeat(padding, maxLength-len(item))
+			}
+		}
+		if rowNum != numRows-1 {
+			s += "\n"
+		}
+	}
+	return s
 }
 
 func drawInBox(s string, b tuiAssets.Box) string {
@@ -201,7 +230,7 @@ func drawInBox(s string, b tuiAssets.Box) string {
 	// num of spaces to add between borders and content; vertical: in rows, horizontal: in spaces
 	verticalPaddingCount := 1 // vertical padding currently isnt clean as the box characters at the sides are missing!
 	horizontalPaddingCount := 4
-	horizontalPadding := strings.Repeat(" ", horizontalPaddingCount)
+	horizontalPadding := strings.Repeat(string(padRune), horizontalPaddingCount)
 	// split string into slice to find longest row
 	ss := strings.Split(s, "\n")
 	// loop over all rows, add padding and find longest row
