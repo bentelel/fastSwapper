@@ -123,12 +123,11 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		// toggle colors of main UI elements
 		case "c":
-			newColor := tuiAssets.GetColorIterator().Next()
-			updateTextStyleColor(&keywordStyle, newColor)
-			// TO DO, this does noting because we define activeBox globally and this does not reset it..
-			updateTextStyleColor(&boxStyle, newColor)
-			updateTextStyleColor(&cursorStyle, newColor)
-		// The "enter" key and the spacebar (a literal space) toggle
+			changeColors()
+		case "b":
+			changeBoxStyle()
+
+			// The "enter" key and the spacebar (a literal space) toggle
 		// the selected state for the item that the cursor is pointing at.
 		case "enter", " ":
 			_, ok := m.selected[m.cursor]
@@ -179,7 +178,7 @@ func (m model) View() string {
 
 	// The footer
 	s += "\n" + helpStyle.Render("q: quit\tu: swap")
-	s += "\n" + helpStyle.Render("c: change colors")
+	s += "\n" + helpStyle.Render("c: change colors\tb: change box")
 	s = drawInBox(s, activeBox) + "\n"
 	// Send the UI for rendering
 	return s
@@ -225,6 +224,21 @@ func drawInBox(s string, b tuiAssets.Box) string {
 	return ret
 }
 
+func changeColors() {
+	newColor := tuiAssets.GetColorIterator().Next()
+	updateTextStyleColor(&keywordStyle, newColor)
+	updateTextStyleColor(&boxStyle, newColor)
+	updateTextStyleColor(&cursorStyle, newColor)
+}
+
+func changeBoxStyle() {
+	activeBox = tuiAssets.GetBoxIterator().Next()
+}
+
+func updateTextStyleColor(toUpdate *lipgloss.Style, newColor string) {
+	*toUpdate = toUpdate.Foreground(lipgloss.Color(newColor))
+}
+
 func runTui() {
 	// at runtime, create default settings JSON if it doesnt exists.
 	InitSettingsJSON()
@@ -240,8 +254,4 @@ func runTui() {
 		fmt.Printf("Something went wrong: %s", err)
 		os.Exit(1)
 	}
-}
-
-func updateTextStyleColor(toUpdate *lipgloss.Style, newColor string) {
-	*toUpdate = toUpdate.Foreground(lipgloss.Color(newColor))
 }

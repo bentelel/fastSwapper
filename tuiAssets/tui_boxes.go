@@ -79,11 +79,26 @@ func GetBoxIterator() *BoxIterator {
 	return boxIterator
 }
 
-func GetDefaultBoxContructor() interface{} {
-	return availableBoxes[0]
+func (bi *BoxIterator) Next() Box {
+	bi.index = (bi.index + 1) % len(bi.boxes)
+	boxConstructor := bi.boxes[bi.index]
+	if f, ok := boxConstructor.(func() Box); ok {
+		return f()
+	}
+	return Box{}
+}
+
+func (bi *BoxIterator) Previous() Box {
+	bi.index = (bi.index - 1 + len(bi.boxes)) % len(bi.boxes)
+	boxConstructor := bi.boxes[bi.index]
+	if f, ok := boxConstructor.(func() Box); ok {
+		return f()
+	}
+	return Box{}
 }
 
 func GetDefaultBox() Box {
+	// currently this could just be an indexing into availableBoxes[0], but if we change the box constructors in the future to include more logic, we want to get the constructors and run them.
 	if f, ok := newBoxIterator().boxes[0].(func() Box); ok {
 		return f()
 	}
