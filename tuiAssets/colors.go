@@ -5,15 +5,23 @@ import "sync"
 const (
 	ORANGE    string = "#ed832d"
 	RED              = "#fc0303"
+	ROSE             = "#f562c1"
+	HOTPINK          = "#f5029f"
+	LILAC            = "#cf02f7"
+	PURPLE           = "#720787"
 	LIGHTBLUE        = "#03b1fc"
 	DARKBLUE         = "#020fc4"
+	YELLOW           = "#f7e40a"
+	LIME             = "#bcf70a"
+	GREEN            = "#0be04b"
+	DARKGREEN        = "#005e1c"
 	WHITE            = "#ffffff"
 	GREY             = "#807d7d"
 )
 
 // first color here is the default color.
 var (
-	availableColors = []string{ORANGE, RED, LIGHTBLUE, DARKBLUE, WHITE, GREY}
+	availableColors = []string{ORANGE, RED, ROSE, HOTPINK, LILAC, PURPLE, LIGHTBLUE, DARKBLUE, YELLOW, LIME, GREEN, DARKGREEN, WHITE, GREY}
 	onceColors      sync.Once
 	colorIterator   *ColorIterator
 )
