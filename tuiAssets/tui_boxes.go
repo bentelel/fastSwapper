@@ -54,10 +54,49 @@ func SingleRounded() Box {
 	}
 }
 
+func Fat() Box {
+	return Box{
+		TopLeftCorner:     "\u259E",
+		TopRightCorner:    "\u259A",
+		BottomLeftCorner:  "\u259A",
+		BottomRightCorner: "\u259E",
+		TopBar:            "\u2580",
+		BottomBar:         "\u2584",
+		LeftBar:           "\u258C",
+		RightBar:          "\u2590",
+	}
+}
+
+func FatDots() Box {
+	return Box{
+		TopLeftCorner:     "\u2591",
+		TopRightCorner:    "\u2591",
+		BottomLeftCorner:  "\u2591",
+		BottomRightCorner: "\u2591",
+		TopBar:            "\u2591",
+		BottomBar:         "\u2591",
+		LeftBar:           "\u2591",
+		RightBar:          "\u2591",
+	}
+}
+
+func Crosses() Box {
+	return Box{
+		TopLeftCorner:     "\u2573",
+		TopRightCorner:    "\u2573",
+		BottomLeftCorner:  "\u2573",
+		BottomRightCorner: "\u2573",
+		TopBar:            "\u2573",
+		BottomBar:         "\u2573",
+		LeftBar:           "\u2573",
+		RightBar:          "\u2573",
+	}
+}
+
 var (
 	onceBoxes      sync.Once
 	boxIterator    *BoxIterator
-	availableBoxes = []interface{}{SingleRounded, DoublePiped, SinglePiped}
+	availableBoxes = []interface{}{SingleRounded, DoublePiped, SinglePiped, Fat, FatDots, Crosses}
 )
 
 type BoxIterator struct {
