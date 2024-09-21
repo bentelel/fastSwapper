@@ -186,8 +186,8 @@ func (m model) View() string {
 
 func drawInBox(s string, b tuiAssets.Box) string {
 	padRune := ' '
-	numRunesLeftBar := utf8.RuneCountInString(StripANSI(b.LeftBar))
-	numRunesRightBar := utf8.RuneCountInString(StripANSI(b.RightBar))
+	numRunesLeftBar := utf8.RuneCountInString(b.LeftBar)
+	numRunesRightBar := utf8.RuneCountInString(b.RightBar)
 	// num of spaces to add between borders and content; vertical: in rows, horizontal: in spaces
 	verticalPaddingCount := 1 // vertical padding currently isnt clean as the box characters at the sides are missing!
 	horizontalPaddingCount := 4
