@@ -2,57 +2,55 @@ package tuiAssets
 
 import (
 	"sync"
-
-	"github.com/charmbracelet/lipgloss"
 )
 
 type Box struct {
-	topLeftCorner     string
-	topRightCorner    string
-	topBar            string
-	bottomLeftCorner  string
-	bottomRightCorner string
-	bottomBar         string
-	leftBar           string
-	rightBar          string
+	TopLeftCorner     string
+	TopRightCorner    string
+	TopBar            string
+	BottomLeftCorner  string
+	BottomRightCorner string
+	BottomBar         string
+	LeftBar           string
+	RightBar          string
 }
 
-func DoublePiped(style lipgloss.Style) Box {
+func DoublePiped() Box {
 	return Box{
-		topLeftCorner:     style.Render("\u2554"),
-		topRightCorner:    style.Render("\u2557"),
-		bottomLeftCorner:  style.Render("\u255A"),
-		bottomRightCorner: style.Render("\u255D"),
-		topBar:            style.Render("\u2550"),
-		bottomBar:         style.Render("\u2550"),
-		leftBar:           style.Render("\u2551"),
-		rightBar:          style.Render("\u2551"),
+		TopLeftCorner:     "\u2554",
+		TopRightCorner:    "\u2557",
+		BottomLeftCorner:  "\u255A",
+		BottomRightCorner: "\u255D",
+		TopBar:            "\u2550",
+		BottomBar:         "\u2550",
+		LeftBar:           "\u2551",
+		RightBar:          "\u2551",
 	}
 }
 
-func SinglePiped(style lipgloss.Style) Box {
+func SinglePiped() Box {
 	return Box{
-		topLeftCorner:     style.Render("\u250F"),
-		topRightCorner:    style.Render("\u2513"),
-		bottomLeftCorner:  style.Render("\u2517"),
-		bottomRightCorner: style.Render("\u251B"),
-		topBar:            style.Render("\u2501"),
-		bottomBar:         style.Render("\u2501"),
-		leftBar:           style.Render("\u2503"),
-		rightBar:          style.Render("\u2503"),
+		TopLeftCorner:     "\u250F",
+		TopRightCorner:    "\u2513",
+		BottomLeftCorner:  "\u2517",
+		BottomRightCorner: "\u251B",
+		TopBar:            "\u2501",
+		BottomBar:         "\u2501",
+		LeftBar:           "\u2503",
+		RightBar:          "\u2503",
 	}
 }
 
-func SingleRounded(style lipgloss.Style) Box {
+func SingleRounded() Box {
 	return Box{
-		topLeftCorner:     style.Render("\u256D"),
-		topRightCorner:    style.Render("\u256E"),
-		bottomLeftCorner:  style.Render("\u2570"),
-		bottomRightCorner: style.Render("\u256F"),
-		topBar:            style.Render("\u2500"),
-		bottomBar:         style.Render("\u2500"),
-		leftBar:           style.Render("\u2502"),
-		rightBar:          style.Render("\u2502"),
+		TopLeftCorner:     "\u256D",
+		TopRightCorner:    "\u256E",
+		BottomLeftCorner:  "\u2570",
+		BottomRightCorner: "\u256F",
+		TopBar:            "\u2500",
+		BottomBar:         "\u2500",
+		LeftBar:           "\u2502",
+		RightBar:          "\u2502",
 	}
 }
 
@@ -81,9 +79,13 @@ func GetBoxIterator() *BoxIterator {
 	return boxIterator
 }
 
-func GetDefaultBox(style lipgloss.Style) Box {
-	//if f, ok := newBoxIterator().boxes[0].(func(lipgloss.Style) Box); ok {
-	//	return f(style)
-	//}
-	return DoublePiped(style)
+func GetDefaultBoxContructor() interface{} {
+	return availableBoxes[0]
+}
+
+func GetDefaultBox() Box {
+	if f, ok := newBoxIterator().boxes[0].(func() Box); ok {
+		return f()
+	}
+	return Box{}
 }

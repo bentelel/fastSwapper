@@ -27,9 +27,7 @@ var (
 	cursorStyle  = lipgloss.NewStyle().Foreground(lipgloss.Color(mainColor))
 	helpStyle    = lipgloss.NewStyle().Foreground(lipgloss.Color(helpColor)) //.Inline(true)
 	boxStyle     = lipgloss.NewStyle().Foreground(lipgloss.Color(mainColor))
-
-	activeBox = tuiAssets.SingleRounded(boxStyle)
-	// activeBox = tuiAssets.GetDefaultBox(boxStyle)
+	activeBox    = tuiAssets.GetDefaultBox()
 )
 
 // model holds the state
@@ -127,6 +125,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "c":
 			newColor := tuiAssets.GetColorIterator().Next()
 			updateTextStyleColor(&keywordStyle, newColor)
+			// TO DO, this does noting because we define activeBox globally and this does not reset it..
 			updateTextStyleColor(&boxStyle, newColor)
 			updateTextStyleColor(&cursorStyle, newColor)
 		// The "enter" key and the spacebar (a literal space) toggle
@@ -188,8 +187,8 @@ func (m model) View() string {
 
 func drawInBox(s string, b tuiAssets.Box) string {
 	padRune := ' '
-	numRunesLeftBar := utf8.RuneCountInString(StripANSI(b.leftBar))
-	numRunesRightBar := utf8.RuneCountInString(StripANSI(b.rightBar))
+	numRunesLeftBar := utf8.RuneCountInString(StripANSI(b.LeftBar))
+	numRunesRightBar := utf8.RuneCountInString(StripANSI(b.RightBar))
 	// num of spaces to add between borders and content; vertical: in rows, horizontal: in spaces
 	verticalPaddingCount := 1 // vertical padding currently isnt clean as the box characters at the sides are missing!
 	horizontalPaddingCount := 4
@@ -210,14 +209,14 @@ func drawInBox(s string, b tuiAssets.Box) string {
 	// we strip ANSI escape sequences from the line because those interfere with the padding.
 	padded_ss := []string{}
 	for _, l := range ss {
-		l = b.leftBar + horizontalPadding + l
-		// the padding does not work cleanly if we swap out leftBar for p.e. "x" instead of "\u2551"
-		l = l + PadRight("", padRune, maxLineLength-len(StripANSI(l))-horizontalPaddingCount+numRunesLeftBar) + horizontalPadding + b.rightBar
+		l = boxStyle.Render(b.LeftBar) + horizontalPadding + l
+		// the padding does not work cleanly if we swap out LeftBar for p.e. "x" instead of "\u2551"
+		l = l + PadRight("", padRune, maxLineLength-len(StripANSI(l))-horizontalPaddingCount+numRunesLeftBar) + horizontalPadding + boxStyle.Render(b.RightBar)
 		padded_ss = append(padded_ss, l)
 	}
-	topLine := b.topLeftCorner + strings.Repeat(b.topBar, maxLineLength-numRunesLeftBar-numRunesRightBar) + b.topRightCorner
-	bottomLine := b.bottomLeftCorner + strings.Repeat(b.bottomBar, maxLineLength-numRunesLeftBar-numRunesRightBar) + b.bottomRightCorner
-	verticalPadding := strings.Repeat(b.leftBar+strings.Repeat(" ", maxLineLength-numRunesLeftBar-numRunesRightBar)+b.rightBar+"\n", verticalPaddingCount)
+	topLine := boxStyle.Render(b.TopLeftCorner) + strings.Repeat(boxStyle.Render(b.TopBar), maxLineLength-numRunesLeftBar-numRunesRightBar) + boxStyle.Render(b.TopRightCorner)
+	bottomLine := boxStyle.Render(b.BottomLeftCorner) + strings.Repeat(boxStyle.Render(b.BottomBar), maxLineLength-numRunesLeftBar-numRunesRightBar) + boxStyle.Render(b.BottomRightCorner)
+	verticalPadding := strings.Repeat(boxStyle.Render(b.LeftBar)+strings.Repeat(" ", maxLineLength-numRunesLeftBar-numRunesRightBar)+boxStyle.Render(b.RightBar)+"\n", verticalPaddingCount)
 	ret := topLine + "\n" +
 		verticalPadding +
 		strings.Join(padded_ss[:], "\n") + "\n" +
