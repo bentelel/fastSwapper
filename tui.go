@@ -10,6 +10,7 @@ import (
 	"github.com/charmbracelet/lipgloss"
 
 	"fastSwapper/tuiAssets"
+	"fastSwapper/utils"
 )
 
 const (
@@ -65,8 +66,8 @@ func (m model) UpdateChoices() tea.Model {
 	settings := GetCompleteSettings(SETTINGSFILENAME)
 	tgkDir := settings.Defaults.Tgkdir
 	tgkFolder := settings.Defaults.Tgkfolder
-	dirs := GetDirsInDir(tgkDir)
-	dirsWithOutTgkFolder := Remove(dirs, tgkFolder)
+	dirs := utils.GetDirsInDir(tgkDir)
+	dirsWithOutTgkFolder := utils.Remove(dirs, tgkFolder)
 	m.choices = dirsWithOutTgkFolder
 	m.lastSelected = nil
 	m.selected = make(map[int]struct{})
@@ -89,7 +90,7 @@ func (m model) swapFolders() error {
 }
 
 func killExcel(name string) error {
-	return KillProcessByName(name)
+	return utils.KillProcessByName(name)
 }
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
@@ -238,7 +239,7 @@ func drawInBox(s string, b tuiAssets.Box) string {
 	for _, l := range ss {
 		// get hypothetical len to not change the line just now >> needs padding based on max len
 		// len of line string + 2 for box chars + twice the horizontalPadding
-		lineLength := len(StripANSI(l)) + numRunesLeftBar + numRunesRightBar + horizontalPaddingCount*2
+		lineLength := len(utils.StripANSI(l)) + numRunesLeftBar + numRunesRightBar + horizontalPaddingCount*2
 		if lineLength > maxLineLength {
 			maxLineLength = lineLength
 		}
@@ -249,7 +250,7 @@ func drawInBox(s string, b tuiAssets.Box) string {
 	for _, l := range ss {
 		l = boxStyle.Render(b.LeftBar) + horizontalPadding + l
 		// the padding does not work cleanly if we swap out LeftBar for p.e. "x" instead of "\u2551"
-		l = l + PadRight("", padRune, maxLineLength-len(StripANSI(l))-horizontalPaddingCount+numRunesLeftBar) + horizontalPadding + boxStyle.Render(b.RightBar)
+		l = l + utils.PadRight("", padRune, maxLineLength-len(utils.StripANSI(l))-horizontalPaddingCount+numRunesLeftBar) + horizontalPadding + boxStyle.Render(b.RightBar)
 		padded_ss = append(padded_ss, l)
 	}
 	topLine := boxStyle.Render(b.TopLeftCorner) + strings.Repeat(boxStyle.Render(b.TopBar), maxLineLength-numRunesLeftBar-numRunesRightBar) + boxStyle.Render(b.TopRightCorner)
@@ -285,8 +286,8 @@ func runTui() {
 	settings := GetCompleteSettings(SETTINGSFILENAME)
 	tgkDir := settings.Defaults.Tgkdir
 	tgkFolder := settings.Defaults.Tgkfolder
-	dirs := GetDirsInDir(tgkDir)
-	dirsWithOutTgkFolder := Remove(dirs, tgkFolder)
+	dirs := utils.GetDirsInDir(tgkDir)
+	dirsWithOutTgkFolder := utils.Remove(dirs, tgkFolder)
 	activeVersion := settings.ActiveSettings.OldDirectory
 	p := tea.NewProgram(mainModel(dirsWithOutTgkFolder, activeVersion))
 	if _, err := p.Run(); err != nil {

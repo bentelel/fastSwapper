@@ -9,6 +9,8 @@ import (
 	"os"
 
 	"github.com/oleiade/reflections"
+
+	"fastSwapper/utils"
 )
 
 type Settings struct {
@@ -67,7 +69,7 @@ func RunSwapper(args []string) error {
 
 func InitSettingsJSON() {
 	candidatePath := TGK_PARENT_DIR_DEFAULT_WIN + SETTINGSFILENAME
-	if !Exists(candidatePath) {
+	if !utils.Exists(candidatePath) {
 		initial_default_settings := Settings{
 			Defaults: Default{
 				Tgkdir:    TGK_PARENT_DIR_DEFAULT_WIN,
@@ -90,7 +92,7 @@ func parseCLIargs(args []string) error {
 	help := HelpInformation()
 	// concatenate all args after 1 (including 1) into 1
 	if len(args) > 1 {
-		args[1], err = CombineString(args[1:])
+		args[1], err = utils.CombineString(args[1:])
 		args = args[:2]
 	}
 	if err != nil {
@@ -130,19 +132,19 @@ func parseCLIargs(args []string) error {
 		return err
 	}
 	// set default path flag expects the syntax of fastSwapper -d <path to directory>
-	if ContainsString(args, SET_DEFAULT_PATH_FLAG) {
+	if utils.ContainsString(args, SET_DEFAULT_PATH_FLAG) {
 		if len(args) < 2 {
 			err = errors.New("No path provided. Use fastSwapper -d <path to default dir>.")
 			return err
 		}
 		candidatePath := args[1]
-		if !Exists(candidatePath) {
+		if !utils.Exists(candidatePath) {
 			err = errors.New("Supplied path does not exist.")
 			return err
 		}
 		setSettings(SETTINGS_FILE_NAME, "Tgkdir", candidatePath)
 	}
-	if ContainsString(args, SET_DEFAULT_WINPATH_FLAG) {
+	if utils.ContainsString(args, SET_DEFAULT_WINPATH_FLAG) {
 		if len(args) > 1 {
 			err = errors.New("Flag -dw does not take any additional arguments.")
 			return err
@@ -150,28 +152,28 @@ func parseCLIargs(args []string) error {
 		setSettings(SETTINGS_FILE_NAME, "Tgkdir", TGK_DIR_DEFAULT_WIN)
 		fmt.Printf("%s set as tagetik addin directory.\n", TGK_DIR_DEFAULT_WIN)
 	}
-	if ContainsString(args, SET_OLDDIR_NAME_FLAG) {
+	if utils.ContainsString(args, SET_OLDDIR_NAME_FLAG) {
 		if len(args) < 2 {
 			err = errors.New("No name for the old directory provided. Use fastSwapper -o <name of the old directory>.")
 			return err
 		}
 		candidateName := args[1]
 		// we should probably also check for characters not supported in directory names..
-		if ContainsStringWord(FORBIDDEN_CHARS[:], candidateName) {
+		if utils.ContainsStringWord(FORBIDDEN_CHARS[:], candidateName) {
 			err = errors.New("Supplied name must not contain forbidden character.")
 			return err
 		}
 		setActiveSettings(SETTINGS_FILE_NAME, "OldDirectory", candidateName)
 		return err
 	}
-	if ContainsString(args, SET_TGK_FOLDER_FLAG) {
+	if utils.ContainsString(args, SET_TGK_FOLDER_FLAG) {
 		if len(args) < 2 {
 			err = errors.New("No name for the addin directory provided. Use fastSwapper -tf <name of the old directory>.")
 			return err
 		}
 		candidateName := args[1]
 		// we should probably also check for characters not supported in directory names..
-		if ContainsStringWord(FORBIDDEN_CHARS[:], candidateName) {
+		if utils.ContainsStringWord(FORBIDDEN_CHARS[:], candidateName) {
 			err = errors.New("Supplied name must not contain forbidden character.")
 			return err
 		}
@@ -250,7 +252,7 @@ func swapDirectories(set Settings, newDirName string, settingsFileName string) e
 	tgkfolder := set.Defaults.Tgkfolder
 	// add logic here that does the following:
 	newDirPath := tgkDir + "\\" + newDirName
-	if !Exists(newDirPath) {
+	if !utils.Exists(newDirPath) {
 		err = errors.New("Folder to swap in does not exist.")
 		return err
 	}
@@ -270,7 +272,7 @@ func swapDirectories(set Settings, newDirName string, settingsFileName string) e
 	setActiveSettings(settingsFileName, "OldDirectory", newDirName)
 	// Terminate MS Excel
 	// err = KillProcessByName(EXCEL_PROCESS_NAME)
-	err = RestartProgramByName("excel")
+	err = utils.RestartProgramByName("excel")
 	// Penultimate return
 	return err
 }
