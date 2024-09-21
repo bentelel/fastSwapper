@@ -1,8 +1,12 @@
-package main
+package tuiAssets
 
-import "github.com/charmbracelet/lipgloss"
+import (
+	"sync"
 
-type box struct {
+	"github.com/charmbracelet/lipgloss"
+)
+
+type Box struct {
 	topLeftCorner     string
 	topRightCorner    string
 	topBar            string
@@ -13,8 +17,8 @@ type box struct {
 	rightBar          string
 }
 
-func DoublePiped(style lipgloss.Style) box {
-	return box{
+func DoublePiped(style lipgloss.Style) Box {
+	return Box{
 		topLeftCorner:     style.Render("\u2554"),
 		topRightCorner:    style.Render("\u2557"),
 		bottomLeftCorner:  style.Render("\u255A"),
@@ -26,8 +30,8 @@ func DoublePiped(style lipgloss.Style) box {
 	}
 }
 
-func SinglePiped(style lipgloss.Style) box {
-	return box{
+func SinglePiped(style lipgloss.Style) Box {
+	return Box{
 		topLeftCorner:     style.Render("\u250F"),
 		topRightCorner:    style.Render("\u2513"),
 		bottomLeftCorner:  style.Render("\u2517"),
@@ -39,8 +43,8 @@ func SinglePiped(style lipgloss.Style) box {
 	}
 }
 
-func SingleRounded(style lipgloss.Style) box {
-	return box{
+func SingleRounded(style lipgloss.Style) Box {
+	return Box{
 		topLeftCorner:     style.Render("\u256D"),
 		topRightCorner:    style.Render("\u256E"),
 		bottomLeftCorner:  style.Render("\u2570"),
@@ -50,4 +54,36 @@ func SingleRounded(style lipgloss.Style) box {
 		leftBar:           style.Render("\u2502"),
 		rightBar:          style.Render("\u2502"),
 	}
+}
+
+var (
+	onceBoxes      sync.Once
+	boxIterator    *BoxIterator
+	availableBoxes = []interface{}{SingleRounded, DoublePiped, SinglePiped}
+)
+
+type BoxIterator struct {
+	boxes []interface{}
+	index int
+}
+
+func newBoxIterator() *BoxIterator {
+	return &BoxIterator{
+		boxes: availableBoxes,
+		index: 0,
+	}
+}
+
+func GetBoxIterator() *BoxIterator {
+	onceBoxes.Do(func() {
+		boxIterator = newBoxIterator()
+	})
+	return boxIterator
+}
+
+func GetDefaultBox(style lipgloss.Style) Box {
+	//if f, ok := newBoxIterator().boxes[0].(func(lipgloss.Style) Box); ok {
+	//	return f(style)
+	//}
+	return DoublePiped(style)
 }

@@ -8,6 +8,8 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
+
+	"fastSwapper/tuiAssets"
 )
 
 const (
@@ -17,10 +19,17 @@ const (
 
 // keywordStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("204")).Background(lipgloss.Color("235"))
 var (
-	keywordStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("#ed832d"))
-	cursorStyle  = lipgloss.NewStyle().Foreground(lipgloss.Color("#ed832d"))
-	helpStyle    = lipgloss.NewStyle().Foreground(lipgloss.Color("241")) //.Inline(true)
-	boxStyle     = lipgloss.NewStyle().Foreground(lipgloss.Color("#ed832d"))
+	mainColor    = tuiAssets.GetDefaultColor()
+	helpColor    = tuiAssets.GREY
+	choicesColor = tuiAssets.WHITE
+	choiceStyle  = lipgloss.NewStyle().Foreground(lipgloss.Color(choicesColor))
+	keywordStyle = lipgloss.NewStyle().Foreground(lipgloss.Color(mainColor))
+	cursorStyle  = lipgloss.NewStyle().Foreground(lipgloss.Color(mainColor))
+	helpStyle    = lipgloss.NewStyle().Foreground(lipgloss.Color(helpColor)) //.Inline(true)
+	boxStyle     = lipgloss.NewStyle().Foreground(lipgloss.Color(mainColor))
+
+	activeBox = tuiAssets.SingleRounded(boxStyle)
+	// activeBox = tuiAssets.GetDefaultBox(boxStyle)
 )
 
 // model holds the state
@@ -114,6 +123,12 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.cursor++
 			}
 
+		// toggle colors of main UI elements
+		case "c":
+			newColor := tuiAssets.GetColorIterator().Next()
+			updateTextStyleColor(&keywordStyle, newColor)
+			updateTextStyleColor(&boxStyle, newColor)
+			updateTextStyleColor(&cursorStyle, newColor)
 		// The "enter" key and the spacebar (a literal space) toggle
 		// the selected state for the item that the cursor is pointing at.
 		case "enter", " ":
@@ -156,18 +171,22 @@ func (m model) View() string {
 			checked = cursorStyle.Render("x") // selected!
 		}
 
+		leftBracket := choiceStyle.Render("[")
+		rightBracket := choiceStyle.Render("]")
+		choice = choiceStyle.Render(choice)
 		// Render the row
-		s += fmt.Sprintf("%s [%s] %s\n", cursor, checked, choice)
+		s += fmt.Sprintf("%s %s%s%s %s\n", cursor, leftBracket, checked, rightBracket, choice)
 	}
 
 	// The footer
-	s += "\n" + helpStyle.Render("Press q to quit.\t Press u to update.")
-	s = drawInBox(s, SingleRounded(boxStyle)) + "\n"
+	s += "\n" + helpStyle.Render("q: quit\tu: swap")
+	s += "\n" + helpStyle.Render("c: change colors")
+	s = drawInBox(s, activeBox) + "\n"
 	// Send the UI for rendering
 	return s
 }
 
-func drawInBox(s string, b box) string {
+func drawInBox(s string, b tuiAssets.Box) string {
 	padRune := ' '
 	numRunesLeftBar := utf8.RuneCountInString(StripANSI(b.leftBar))
 	numRunesRightBar := utf8.RuneCountInString(StripANSI(b.rightBar))
@@ -222,4 +241,8 @@ func runTui() {
 		fmt.Printf("Something went wrong: %s", err)
 		os.Exit(1)
 	}
+}
+
+func updateTextStyleColor(toUpdate *lipgloss.Style, newColor string) {
+	*toUpdate = toUpdate.Foreground(lipgloss.Color(newColor))
 }
