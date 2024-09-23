@@ -241,9 +241,14 @@ func drawInBox(s string, b tuiAssets.Box) string {
 		l = l + utils.PadRight("", padRune, maxLineLength-len(utils.StripANSI(l))-horizontalPaddingCount+numRunesLeftBar) + horizontalPadding + boxStyle.Render(b.RightBar)
 		padded_ss = append(padded_ss, l)
 	}
-	topLine := boxStyle.Render(b.TopLeftCorner) + strings.Repeat(boxStyle.Render(b.TopBar), maxLineLength-numRunesLeftBar-numRunesRightBar) + boxStyle.Render(b.TopRightCorner)
-	bottomLine := boxStyle.Render(b.BottomLeftCorner) + strings.Repeat(boxStyle.Render(b.BottomBar), maxLineLength-numRunesLeftBar-numRunesRightBar) + boxStyle.Render(b.BottomRightCorner)
-	verticalPadding := strings.Repeat(boxStyle.Render(b.LeftBar)+strings.Repeat(" ", maxLineLength-numRunesLeftBar-numRunesRightBar)+boxStyle.Render(b.RightBar)+"\n", verticalPaddingCount)
+	topLine := boxStyle.Render(b.TopLeftCorner)
+	topLine += strings.Repeat(boxStyle.Render(b.TopBar), maxLineLength-numRunesLeftBar-numRunesRightBar)
+	topLine += boxStyle.Render(b.TopRightCorner)
+	bottomLine := boxStyle.Render(b.BottomLeftCorner)
+	bottomLine += strings.Repeat(boxStyle.Render(b.BottomBar), maxLineLength-numRunesLeftBar-numRunesRightBar)
+	bottomLine += boxStyle.Render(b.BottomRightCorner)
+	verticalPad := boxStyle.Render(b.LeftBar) + strings.Repeat(" ", maxLineLength-numRunesLeftBar-numRunesRightBar) + boxStyle.Render(b.RightBar) + "\n"
+	verticalPadding := strings.Repeat(verticalPad, verticalPaddingCount)
 	ret := topLine + "\n" +
 		verticalPadding +
 		strings.Join(padded_ss[:], "\n") + "\n" +
