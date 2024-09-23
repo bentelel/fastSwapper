@@ -3,6 +3,8 @@ package main
 //"os"
 
 func main() {
-	// RunSwapper(os.Args)
+	// Initialize Settings
+	InitSettingsJSON()
+	// start the TUI
 	runTui()
 }

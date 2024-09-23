@@ -13,26 +13,24 @@ import (
 	"fastSwapper/utils"
 )
 
-const (
-	SETTINGSFILENAME string = "settings.json"
-	SWAPFLAG                = "-sw"
-)
-
-// keywordStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("204")).Background(lipgloss.Color("235"))
 var (
-	mainColor     = tuiAssets.GetDefaultColor()
-	footerColor   = tuiAssets.GREY
-	headerColor   = tuiAssets.GREY
-	choicesColor  = tuiAssets.WHITE
-	choiceStyle   = lipgloss.NewStyle().Foreground(lipgloss.Color(choicesColor))
-	keywordStyle  = lipgloss.NewStyle().Foreground(lipgloss.Color(mainColor))
-	cursorStyle   = lipgloss.NewStyle().Foreground(lipgloss.Color(mainColor))
-	footerStyle   = lipgloss.NewStyle().Foreground(lipgloss.Color(footerColor))
-	headerStyle   = lipgloss.NewStyle().Foreground(lipgloss.Color(headerColor))
-	boxStyle      = lipgloss.NewStyle().Foreground(lipgloss.Color(mainColor))
-	activeBox     = tuiAssets.GetDefaultBox()
-	footerItems   = []string{"q: quit", "u: swap", "c: change colors", "b: change box"}
-	numFooterRows = 2
+	mainColor          = tuiAssets.GetDefaultColor()
+	footerColor        = tuiAssets.GREY
+	headerColor        = tuiAssets.GREY
+	choicesColor       = tuiAssets.WHITE
+	choiceStyle        = lipgloss.NewStyle().Foreground(lipgloss.Color(choicesColor))
+	keywordStyle       = lipgloss.NewStyle().Foreground(lipgloss.Color(mainColor))
+	cursorStyle        = lipgloss.NewStyle().Foreground(lipgloss.Color(mainColor))
+	footerStyle        = lipgloss.NewStyle().Foreground(lipgloss.Color(footerColor))
+	headerStyle        = lipgloss.NewStyle().Foreground(lipgloss.Color(headerColor))
+	boxStyle           = lipgloss.NewStyle().Foreground(lipgloss.Color(mainColor))
+	activeBox          = tuiAssets.GetDefaultBox()
+	footerItems        = []string{"q: quit", "u: swap", "c: change colors", "b: change box"}
+	numFooterRows      = 2
+	cursorSymbol       = ">"
+	checkmarkSymbol    = "x"
+	leftbracketSymbol  = "["
+	rightbracketSymbol = "]"
 )
 
 // model holds the state
@@ -63,26 +61,18 @@ func (m model) Init() tea.Cmd {
 // this should be used to update the model > when we swap folders the list of choices needs to be refreshed
 // this currently keeps the cursor position and selection! if the order of choices would change this would lead to wrong highlighting
 func (m model) UpdateChoices() tea.Model {
-	settings := GetCompleteSettings(SETTINGSFILENAME)
-	tgkDir := settings.Defaults.Tgkdir
-	tgkFolder := settings.Defaults.Tgkfolder
-	dirs := utils.GetDirsInDir(tgkDir)
-	dirsWithOutTgkFolder := utils.Remove(dirs, tgkFolder)
+	dirsWithOutTgkFolder := DirectoriesInTgkDirExcludingTgkFolder()
 	m.choices = dirsWithOutTgkFolder
 	m.lastSelected = nil
 	m.selected = make(map[int]struct{})
-	m.active = settings.ActiveSettings.OldDirectory
+	m.active = GetActiveVersion()
 	return m
 }
 
 func (m model) swapFolders() error {
 	var err error = nil
-	// for now lets basically build the CLI args in here as string
-	bogusProgramName := "prog"
-	swapFlag := SWAPFLAG
 	target := m.choices[m.cursor]
-	args := []string{bogusProgramName, swapFlag, target}
-	err = RunSwapper(args)
+	err = SwapDirectories(target)
 	if err != nil {
 		return err
 	}
@@ -114,25 +104,21 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 			return m.UpdateChoices(), nil
 
-			// The "up" and "k" keys move the cursor up
 		case "up", "k":
 			if m.cursor > 0 {
 				m.cursor--
 			}
 
-		// The "down" and "j" keys move the cursor down
 		case "down", "j":
 			if m.cursor < len(m.choices)-1 {
 				m.cursor++
 			}
 
-		// toggle colors of main UI elements
 		case "c":
 			changeColors()
 		case "b":
 			changeBoxStyle()
 
-			// The "enter" key and the spacebar (a literal space) toggle
 		// the selected state for the item that the cursor is pointing at.
 		case "enter", " ":
 			_, ok := m.selected[m.cursor]
@@ -165,17 +151,17 @@ func (m model) View() string {
 		// Is the cursor pointing at this choice?
 		cursor := " " // no cursor
 		if m.cursor == i {
-			cursor = cursorStyle.Render(">") // cursor!
+			cursor = cursorStyle.Render(cursorSymbol) // cursor!
 		}
 
 		// Is this choice selected?
 		checked := " " // not selected
 		if _, ok := m.selected[i]; ok {
-			checked = cursorStyle.Render("x") // selected!
+			checked = cursorStyle.Render(checkmarkSymbol) // selected!
 		}
 
-		leftBracket := choiceStyle.Render("[")
-		rightBracket := choiceStyle.Render("]")
+		leftBracket := choiceStyle.Render(leftbracketSymbol)
+		rightBracket := choiceStyle.Render(rightbracketSymbol)
 		choice = choiceStyle.Render(choice)
 		// Render the row
 		s += fmt.Sprintf("%s %s%s%s %s\n", cursor, leftBracket, checked, rightBracket, choice)
@@ -199,6 +185,8 @@ func drawInGrid(items []string, numRows int) string {
 	}
 	counter := 0
 	maxLength := 0
+	// Split items into rows and items per row
+	// since we are already iterating over the slice, we find the maximum length among items at the same time
 	for idx, item := range items {
 		rows[counter][idx%itemsPerRow] = item
 		if idx%itemsPerRow == itemsPerRow-1 {
@@ -280,15 +268,8 @@ func updateTextStyleColor(toUpdate *lipgloss.Style, newColor string) {
 }
 
 func runTui() {
-	// at runtime, create default settings JSON if it doesnt exists.
-	InitSettingsJSON()
-
-	settings := GetCompleteSettings(SETTINGSFILENAME)
-	tgkDir := settings.Defaults.Tgkdir
-	tgkFolder := settings.Defaults.Tgkfolder
-	dirs := utils.GetDirsInDir(tgkDir)
-	dirsWithOutTgkFolder := utils.Remove(dirs, tgkFolder)
-	activeVersion := settings.ActiveSettings.OldDirectory
+	dirsWithOutTgkFolder := DirectoriesInTgkDirExcludingTgkFolder()
+	activeVersion := GetActiveVersion()
 	p := tea.NewProgram(mainModel(dirsWithOutTgkFolder, activeVersion))
 	if _, err := p.Run(); err != nil {
 		fmt.Printf("Something went wrong: %s", err)

@@ -68,7 +68,7 @@ func RunSwapper(args []string) error {
 }
 
 func InitSettingsJSON() {
-	candidatePath := TGK_PARENT_DIR_DEFAULT_WIN + SETTINGSFILENAME
+	candidatePath := TGK_PARENT_DIR_DEFAULT_WIN + SETTINGS_FILE_NAME
 	if !utils.Exists(candidatePath) {
 		initial_default_settings := Settings{
 			Defaults: Default{
@@ -244,6 +244,36 @@ func setActiveSettings(filename string, defaultToChange string, newValue string)
 	updateSettingsJson(filename, unmarshaledJson)
 }
 
+func GetActiveVersion() string {
+	set := getActiveSettings(SETTINGS_FILE_NAME)
+	return set.OldDirectory
+}
+
+func GetTgkFolder() string {
+	set := getSettings(SETTINGS_FILE_NAME)
+	return set.Tgkfolder
+}
+
+func GetTgkDir() string {
+	set := getSettings(SETTINGS_FILE_NAME)
+	return set.Tgkdir
+}
+
+func DirectoriesInTgkDirExcludingTgkFolder() []string {
+	tgkDir := GetTgkDir()
+	tgkFolder := GetTgkFolder()
+	dirs := utils.GetDirsInDir(tgkDir)
+	dirsWithOutTgkFolder := utils.Remove(dirs, tgkFolder)
+	return dirsWithOutTgkFolder
+}
+
+// shadows private method swapDirectories in order to let the caller not care about the settings file
+func SwapDirectories(newDirName string) error {
+	return swapDirectories(GetCompleteSettings(SETTINGS_FILE_NAME), newDirName, SETTINGS_FILE_NAME)
+}
+
+// this swaps two folders
+// needs refactoring, why the heck am I passing in a Settings obj and settingsFileName?
 func swapDirectories(set Settings, newDirName string, settingsFileName string) error {
 	// the fact that I have to pass in the settings file name here is bad imo.. maybe refactor lator.
 	var err error
